@@ -1,10 +1,11 @@
 package dev.lexoland.listener
 
 import com.destroystokyo.paper.event.block.TNTPrimeEvent
-import dev.lexoland.core.GameManager
-import dev.lexoland.core.Loot
+import dev.lexoland.QSG
+import dev.lexoland.utils.text
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.JoinConfiguration
+import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Location
 import org.bukkit.Material
@@ -16,8 +17,8 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 
-private val addedText = Component.text("Added container [")
-private val removedText = Component.text("Removed container [")
+private val addedText = Component.text().content("Added container to map \"")
+private val removedText = Component.text().content("Removed container from map \"")
 
 object BuildListener : Listener {
 
@@ -34,8 +35,11 @@ object BuildListener : Listener {
                 }
             }
         } else if (e.block.state is Container) {
-            e.player.sendMessage(textFactory(addedText, e.block.translationKey(), e.block.location))
-            Loot.containers.add(e.block.state as Container)
+            val map = QSG.getMap(e.block.world)
+            if (map != null) {
+                e.player.sendMessage(textFactory(addedText, map.name, e.block.translationKey(), e.block.location))
+                map.containers.add(e.block.state as Container)
+            }
         }
     }
 
@@ -43,9 +47,12 @@ object BuildListener : Listener {
     fun cancelBuild(e: BlockBreakEvent) {
         if (!allowed.contains(e.player)) {
             e.isCancelled = true
-        } else if (e.block.state is Container && Loot.containers.contains(e.block.state)) {
-            e.player.sendMessage(textFactory(removedText, e.block.translationKey(), e.block.location))
-            Loot.containers.remove(e.block.state)
+        } else if (e.block.state is Container) {
+            val map = QSG.getMap(e.block.world)
+            if (map != null && map.containers.contains(e.block.state)) {
+                e.player.sendMessage(textFactory(removedText, map.name, e.block.translationKey(), e.block.location))
+                map.containers.remove(e.block.state as Container)
+            }
         }
     }
 
@@ -54,18 +61,24 @@ object BuildListener : Listener {
         e.isCancelled = true
     }
 
-    private fun textFactory(prefix: Component, key: String, pos: Location) =
-        prefix.append(
-            Component.translatable(key)
-        ).append(
-            Component.text("] at ")
-        )
+    private fun textFactory(prefix: TextComponent.Builder, world: Component, key: String, pos: Location) =
+        prefix
+            .append(
+                world
+            )
+            .append(
+                text("\": [")
+            ).append(
+                Component.translatable(key)
+            ).append(
+                text("] at ")
+            )
             .append(
                 Component.join(
                     JoinConfiguration.commas(true),
-                    Component.text(pos.x, NamedTextColor.AQUA),
-                    Component.text(pos.y, NamedTextColor.AQUA),
-                    Component.text(pos.z, NamedTextColor.AQUA)
+                    text(pos.x, NamedTextColor.AQUA),
+                    text(pos.y, NamedTextColor.AQUA),
+                    text(pos.z, NamedTextColor.AQUA)
                 )
             )
 }

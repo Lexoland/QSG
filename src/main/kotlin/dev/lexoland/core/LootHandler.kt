@@ -1,39 +1,16 @@
 package dev.lexoland.core
 
 import dev.lexoland.QSG
+import dev.lexoland.core.GameManager.randomSource
 import dev.lexoland.utils.FilterableWeightedList
-import java.util.Random
 import org.bukkit.Bukkit
-import org.bukkit.GameMode
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Container
-import org.bukkit.entity.Player
 import org.bukkit.loot.Lootable
 
-object GameManager {
-
-    var started = false
-
-    fun startGame() {
-        Loot.setup()
-    }
-
-    fun join(player: Player) {
-        if(started) {
-            player.gameMode = GameMode.SPECTATOR
-            // TODO: Add spectator stuff
-            return
-        }
-
-        player.gameMode = GameMode.SURVIVAL
-        player.inventory.clear()
-        SpawnHandler.prepareSpawnFor(player)
-    }
-}
-
-object Loot {
-    val randomSource = Random()
-    val containers = mutableListOf<Container>()
+class LootHandler(
+    private val containers: List<Container>
+) {
 
     fun setup() {
         containers.forEach {

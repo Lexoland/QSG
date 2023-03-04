@@ -1,10 +1,10 @@
 package dev.lexoland.utils
 
-import java.util.Random
 import java.util.function.Consumer
 import java.util.function.Predicate
 import java.util.stream.Stream
 import kotlin.math.pow
+import kotlin.random.Random
 
 class FilterableWeightedList<U> {
     private val entries: MutableList<Entry<U>> = ArrayList()
