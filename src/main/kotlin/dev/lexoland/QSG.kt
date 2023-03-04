@@ -3,13 +3,13 @@ package dev.lexoland
 import dev.lexoland.cmd.buildCommand
 import dev.lexoland.cmd.mapCommand
 import dev.lexoland.cmd.spawnCommand
-import dev.lexoland.core.MapData
+import dev.lexoland.core.loadMaps
+import dev.lexoland.core.saveMaps
 import dev.lexoland.listener.BuildListener
 import dev.lexoland.listener.JoinListener
 import dev.lexoland.utils.commands
 import dev.lexoland.utils.listeners
-import java.util.UUID
-import org.bukkit.World
+import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -35,13 +35,13 @@ class QSG : JavaPlugin() {
             BuildListener,
             JoinListener
         )
+
+        Bukkit.getScheduler().runTask(this) { _ ->
+            loadMaps()
+        }
     }
 
-    companion object {
-        private val worldToMap = mutableMapOf<UUID, MapData>()
-
-        fun registerMap(map: MapData) = worldToMap.put(map.world.uid, map)
-
-        fun getMap(world: World) = worldToMap[world.uid]
+    override fun onDisable() {
+        saveMaps()
     }
 }

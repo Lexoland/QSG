@@ -8,17 +8,17 @@ import org.bukkit.entity.Player
 object GameManager {
 
     val randomSource = Random().asKotlinRandom()
-    val maps = mutableListOf<MapData>()
+    val maps = mutableListOf<Map>()
 
-    lateinit var map: MapData
+    lateinit var map: Map
     lateinit var spawnHandler: SpawnHandler
-    lateinit var lootHandler: LootHandler
+    lateinit var lootBoxHandler: LootBoxHandler
     var started = false
 
     fun setup() {
         map = maps.random(randomSource)
         spawnHandler = SpawnHandler(map.center, map.spawns)
-        lootHandler = LootHandler(map.containers)
+        lootBoxHandler = LootBoxHandler(map.lootBoxes)
     }
 
     fun startGame() {

@@ -11,6 +11,7 @@ import org.bukkit.command.CommandSender
 val PREFIX = text("[", rgb(0x43a180)) +
         text("QSG", rgb(0x00ffa6), TextDecoration.BOLD) +
         text("] ", rgb(0x43a180))
+
 fun text(content: String, color: TextColor? = null, vararg deco: TextDecoration = emptyArray()) = Component.text(content, Style.style { b ->
     color?.let { b.color(it) }
     if (deco.isNotEmpty())
