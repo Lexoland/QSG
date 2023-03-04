@@ -2,7 +2,6 @@ package dev.lexoland
 
 import dev.lexoland.cmd.buildCommand
 import dev.lexoland.cmd.mapCommand
-import dev.lexoland.cmd.spawnCommand
 import dev.lexoland.core.GameManager
 import dev.lexoland.core.loadMaps
 import dev.lexoland.core.saveMaps
@@ -33,7 +32,6 @@ class QSG : JavaPlugin() {
 
         commands(
             buildCommand,
-            spawnCommand,
             mapCommand
         )
         listeners(
