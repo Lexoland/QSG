@@ -1,16 +1,16 @@
 package dev.lexoland.cmd
 
+import de.leximon.api.command.CommandUser
 import dev.lexoland.listener.BuildListener
-import dev.lexoland.utils.brigadierCommand
-import dev.lexoland.utils.executes
-import dev.lexoland.utils.respond
-import dev.lexoland.utils.text
+import dev.lexoland.utils.*
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.entity.Player
 
 val buildCommand = brigadierCommand(
     "build",
+    permissions = arrayOf("qsg.command.build"),
+    users = arrayOf(CommandUser.PLAYER),
     aliases = arrayOf("b")
 ) {
     executes<Player> { sender, _ ->

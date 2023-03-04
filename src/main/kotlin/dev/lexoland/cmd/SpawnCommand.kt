@@ -1,12 +1,10 @@
 package dev.lexoland.cmd
 
-import org.bukkit.command.Command
-import org.bukkit.command.CommandExecutor
-import org.bukkit.command.CommandSender
+import dev.lexoland.utils.brigadierCommand
 
-object SpawnCommand : CommandExecutor {
-
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>?): Boolean {
-        return true
+val spawnCommand = brigadierCommand("spawn") {
+    executes { sender, _ ->
+        sender.sendMessage("Hello world!")
+        return@executes 1
     }
 }

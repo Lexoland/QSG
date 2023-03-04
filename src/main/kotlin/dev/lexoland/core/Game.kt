@@ -1,5 +1,6 @@
 package dev.lexoland.core
 
+import dev.lexoland.PLUGIN
 import dev.lexoland.QSG
 import dev.lexoland.utils.FilterableWeightedList
 import java.util.Random
@@ -61,5 +62,5 @@ object Loot {
         .add(key("good_food"), 5)
         .add(key("good_armor"), 5)
 
-    private fun key(key: String) = NamespacedKey(QSG.plugin, "qsg/$key")
+    private fun key(key: String) = NamespacedKey(PLUGIN, "qsg/$key")
 }

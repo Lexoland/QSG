@@ -1,30 +1,30 @@
 package dev.lexoland
 
-import de.leximon.api.command.CommandAPI
 import dev.lexoland.cmd.buildCommand
+import dev.lexoland.cmd.spawnCommand
 import dev.lexoland.listener.BuildListener
 import dev.lexoland.utils.commands
 import dev.lexoland.utils.listeners
-import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
+val LOG = LoggerFactory.getLogger("QSG") as Logger
+lateinit var PLUGIN: QSG
 
 class QSG : JavaPlugin() {
 
-    val log = LoggerFactory.getLogger("QSG")
-
     override fun onLoad() {
-        plugin = this
+        PLUGIN = this
     }
 
     override fun onEnable() {
-        log.info("Starting!")
+        LOG.info("Starting!")
 
-        commands(buildCommand)
+        commands(
+            buildCommand,
+            spawnCommand
+        )
         listeners(BuildListener)
-    }
-
-    companion object {
-        lateinit var plugin: QSG
     }
 }
