@@ -24,20 +24,14 @@ class LootBoxHandler(world: World, map: Map) {
     }
 
     private val weightedLoot = FilterableWeightedList<NamespacedKey>()
-        .add("bad_combat".key(), 20)
-        .add("bad_supply".key(), 20)
-        .add("bad_food".key(), 20)
-        .add("bad_armor".key(), 20)
+        .add("bad/chest_1".key(), 20)
+        .add("bad/chest_2".key(), 20)
 
-        .add("normal_combat".key(), 10)
-        .add("normal_supply".key(), 10)
-        .add("normal_food".key(), 10)
-        .add("normal_armor".key(), 10)
+        .add("normal/chest_1".key(), 10)
+        .add("normal/chest_2".key(), 10)
 
-        .add("good_combat".key(), 5)
-        .add("good_supply".key(), 5)
-        .add("good_food".key(), 5)
-        .add("good_armor".key(), 5)
+        .add("good/chest_1".key(), 5)
+        .add("good/chest_2".key(), 5)
 
     private fun String.key() = NamespacedKey(PLUGIN, "qsg/$this")
 }
