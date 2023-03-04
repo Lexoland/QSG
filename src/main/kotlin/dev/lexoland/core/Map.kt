@@ -1,14 +1,14 @@
 package dev.lexoland.core
 
 import dev.lexoland.utils.jsonFormat
+import java.io.File
+import java.util.UUID
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import net.kyori.adventure.text.Component
 import org.bukkit.Location
 import org.bukkit.World
-import java.io.File
-import java.util.*
 
 private val maps = mutableMapOf<UUID, Map>()
 
@@ -30,6 +30,12 @@ data class Map(
 val World.map get() = maps[uid]
 
 private val mapDirectory = File("maps")
+
+fun randomMap() = maps.values.randomOrNull()
+
+fun registerMap(map: Map) {
+    maps[map.world.uid] = map
+}
 
 fun saveMaps() {
     mapDirectory.mkdirs()

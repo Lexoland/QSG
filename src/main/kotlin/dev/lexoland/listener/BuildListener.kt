@@ -1,7 +1,8 @@
 package dev.lexoland.listener
 
 import com.destroystokyo.paper.event.block.TNTPrimeEvent
-import dev.lexoland.QSG
+import dev.lexoland.core.LootBox
+import dev.lexoland.core.map
 import dev.lexoland.utils.text
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.JoinConfiguration
@@ -35,10 +36,10 @@ object BuildListener : Listener {
                 }
             }
         } else if (e.block.state is Container) {
-            val map = QSG.getMap(e.block.world)
+            val map = e.block.world.map
             if (map != null) {
-                e.player.sendMessage(textFactory(addedText, map.name, e.block.translationKey(), e.block.location))
-                map.containers.add(e.block.state as Container)
+                e.player.sendMessage(textFactory(addedText, map.displayName, e.block.translationKey(), e.block.location))
+                map.lootBoxes.add(LootBox(e.block.location))
             }
         }
     }
@@ -48,10 +49,10 @@ object BuildListener : Listener {
         if (!allowed.contains(e.player)) {
             e.isCancelled = true
         } else if (e.block.state is Container) {
-            val map = QSG.getMap(e.block.world)
-            if (map != null && map.containers.contains(e.block.state)) {
-                e.player.sendMessage(textFactory(removedText, map.name, e.block.translationKey(), e.block.location))
-                map.containers.remove(e.block.state as Container)
+            val map = e.block.world.map
+            if (map != null && map.lootBoxes.any { it.location == e.block.location }) {
+                e.player.sendMessage(textFactory(removedText, map.displayName, e.block.translationKey(), e.block.location))
+                map.lootBoxes.removeIf { it.location == e.block.location }
             }
         }
     }

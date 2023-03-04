@@ -1,10 +1,10 @@
 package dev.lexoland.core
 
+import kotlin.math.atan
+import kotlin.math.tan
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import kotlin.math.atan
-import kotlin.math.tan
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.ArmorStand
@@ -16,7 +16,7 @@ import org.bukkit.potion.PotionEffectType
 
 class SpawnHandler(
     private val center: Location,
-    private val spawns: MutableList<Spawn>
+    val spawns: MutableList<Spawn>
 ) {
     fun prepareSpawnFor(player: Player) {
         val spawn = spawns.filter { it.isFree() }.random()
@@ -27,6 +27,15 @@ class SpawnHandler(
             val angle = atan(tan((x - center.x) / (z - center.z)))
             yaw = Math.toDegrees(angle).toFloat()
         })
+    }
+
+    fun hasFreeSpawns() = spawns.any { it.isFree() }
+
+    fun hasMoreThanOneSurvivor() = spawns.count { !it.isFree() } > 1
+
+    fun onDeath(player: Player) {
+        val spawn = spawns.first { it.player == player }
+        spawn.reset()
     }
 }
 
@@ -46,18 +55,14 @@ class Spawn(@Contextual val location: Location) {
         location.clone().add(-1.0, 1.0, 0.0),
     )
 
-    @Transient private var player: Player? = null
+    @Transient
+    var player: Player? = null
     @Transient private var armorStand: ArmorStand? = null
 
     fun reset() {
         armorStand?.remove()
         armorStand = null
         player = null
-    }
-
-    fun onDeath() {
-        armorStand?.remove()
-        armorStand = null
     }
 
     fun enclose() {
