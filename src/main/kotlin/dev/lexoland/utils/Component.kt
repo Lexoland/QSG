@@ -8,16 +8,25 @@ import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.command.CommandSender
 
-val PREFIX = text("[", NamedTextColor.AQUA) +
-        text("QSG", NamedTextColor.AQUA, TextDecoration.BOLD) +
-        text("] ", NamedTextColor.AQUA)
-
+val PREFIX = text("[", rgb(0x43a180)) +
+        text("QSG", rgb(0x00ffa6), TextDecoration.BOLD) +
+        text("] ", rgb(0x43a180))
 fun text(content: String, color: TextColor? = null, vararg deco: TextDecoration = emptyArray()) = Component.text(content, Style.style { b ->
     color?.let { b.color(it) }
     if (deco.isNotEmpty())
         b.decorate(*deco)
 })
 fun text(value: Any, color: TextColor? = null, vararg deco: TextDecoration = emptyArray()) = text(value.toString(), color, *deco)
+
+
+fun gradient(
+    content: String,
+    c1: TextColor, c2: TextColor,
+    vararg deco: TextDecoration = emptyArray()
+) = Component.text().apply {
+    for (i in content.indices)
+        it.append(text(content[i], TextColor.lerp(i.toFloat() / content.length.toFloat(), c1, c2), *deco))
+}.build()
 
 fun CommandSender.respond(
     message: String,
@@ -48,3 +57,9 @@ fun String.format(
 }
 
 operator fun Component.plus(other: Component) = append(other)
+
+operator fun Component.plus(other: String) = append(text(other))
+
+
+fun rgb(r: Int, g: Int, b: Int) = TextColor.color(r, g, b)
+fun rgb(color: Int) = TextColor.color(color)

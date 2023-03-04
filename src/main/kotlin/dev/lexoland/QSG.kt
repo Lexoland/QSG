@@ -1,9 +1,11 @@
 package dev.lexoland
 
 import dev.lexoland.cmd.buildCommand
+import dev.lexoland.cmd.mapCommand
 import dev.lexoland.cmd.spawnCommand
 import dev.lexoland.core.MapData
 import dev.lexoland.listener.BuildListener
+import dev.lexoland.listener.JoinListener
 import dev.lexoland.utils.commands
 import dev.lexoland.utils.listeners
 import java.util.UUID
@@ -26,9 +28,13 @@ class QSG : JavaPlugin() {
 
         commands(
             buildCommand,
-            spawnCommand
+            spawnCommand,
+            mapCommand
         )
-        listeners(BuildListener)
+        listeners(
+            BuildListener,
+            JoinListener
+        )
     }
 
     companion object {
