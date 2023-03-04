@@ -4,6 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType
 import dev.lexoland.PLUGIN
 import dev.lexoland.asId
 import dev.lexoland.core.Map
+import dev.lexoland.core.Spawn
 import dev.lexoland.core.map
 import dev.lexoland.core.registerMap
 import dev.lexoland.utils.argument
@@ -57,6 +58,42 @@ val mapCommand = brigadierCommand("map") {
                 sender.respond("You are not in a map.")
             }
             return@executes 1
+        }
+    }
+
+    literal("spawn") {
+        literal("add") {
+            executes<Player> { sender, _ ->
+                val map = sender.world.map
+                if (map != null) {
+                    map.spawns.add(Spawn(sender.location))
+                    sender.respond("Spawn set to {}, {}, {}.",
+                        text(sender.location.x, NamedTextColor.AQUA),
+                        text(sender.location.y, NamedTextColor.AQUA),
+                        text(sender.location.z, NamedTextColor.AQUA))
+                } else {
+                    sender.respond("You are not in a map.")
+                }
+                return@executes 1
+            }
+        }
+
+        literal("remove") {
+            executes<Player> { sender, _ ->
+                val map = sender.world.map
+                if (map != null) {
+                    val spawn = map.spawns.find { it.location == sender.location }
+                    if (spawn != null) {
+                        map.spawns.remove(spawn)
+                        sender.respond("Spawn removed.")
+                    } else {
+                        sender.respond("There is no spawn at your location.")
+                    }
+                } else {
+                    sender.respond("You are not in a map.")
+                }
+                return@executes 1
+            }
         }
     }
 }

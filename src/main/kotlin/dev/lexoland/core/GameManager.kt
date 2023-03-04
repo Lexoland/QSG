@@ -20,9 +20,9 @@ object GameManager {
 
     val randomSource = Random().asKotlinRandom()
 
-    lateinit var map: Map
-    lateinit var spawnHandler: SpawnHandler
+    private lateinit var map: Map
     private lateinit var lootBoxHandler: LootBoxHandler
+    lateinit var spawnHandler: SpawnHandler
     var started = false
     var inGame = false
     var preparation = true
