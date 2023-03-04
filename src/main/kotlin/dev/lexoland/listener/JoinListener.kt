@@ -1,6 +1,6 @@
 package dev.lexoland.listener
 
-import dev.lexoland.core.GameManager
+import dev.lexoland.core.Game
 import dev.lexoland.utils.*
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -12,7 +12,7 @@ object JoinListener : Listener {
     @EventHandler
     fun onJoin(e: PlayerJoinEvent) {
         e.joinMessage(PREFIX + gradient("» ${e.player.name}", rgb(0x00ff00), rgb(0x00aa00)))
-        GameManager.join(e.player)
+        Game.join(e.player)
     }
 
     @EventHandler

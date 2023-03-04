@@ -7,35 +7,34 @@ import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import net.kyori.adventure.text.Component
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
-
-private val maps = mutableMapOf<UUID, Map>()
+import org.bukkit.WorldCreator
+import org.bukkit.block.Container
+import org.bukkit.util.Vector
 
 @Serializable
 data class Map(
-    @Contextual
-    val world: World,
     val name: String,
-    @Contextual
-    val displayName: Component
+    val displayName: @Contextual Component
 ) {
-
-    @Contextual
-    lateinit var center: Location
-    val spawns = mutableListOf<Spawn>()
-    val lootBoxes = mutableListOf<LootBox>()
+    var center: @Contextual Vector = Vector(0, 64, 0)
+    val spawns = mutableListOf<@Contextual Vector>()
+    val lootBoxes = mutableListOf<@Contextual Vector>()
 }
 
-val World.map get() = maps[uid]
+val maps = mutableMapOf<String, Map>()
 
-private val mapDirectory = File("maps")
+val World.map get() = maps[name]
 
 fun randomMap() = maps.values.randomOrNull()
 
 fun registerMap(map: Map) {
-    maps[map.world.uid] = map
+    maps[map.name] = map
 }
+
+private val mapDirectory = File("maps")
 
 fun saveMaps() {
     mapDirectory.mkdirs()
@@ -46,10 +45,12 @@ fun saveMaps() {
 }
 
 fun loadMaps() {
+    if (!mapDirectory.exists())
+        return
     for (file in mapDirectory.listFiles()!!) {
         if (!file.isFile)
             continue
         val map = jsonFormat.decodeFromString(Map.serializer(), file.readText())
-        maps[map.world.uid] = map
+        maps[map.name] = map
     }
 }

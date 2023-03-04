@@ -1,23 +1,23 @@
 package dev.lexoland.core
 
-import kotlin.math.atan
-import kotlin.math.tan
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.World
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
+import org.bukkit.util.Vector
+import kotlin.math.atan
+import kotlin.math.tan
 
-class SpawnHandler(
-    private val center: Location,
-    val spawns: MutableList<Spawn>
-) {
+class SpawnHandler(world: World, map: Map) {
+
+    val spawns = map.spawns.map { Spawn(world, it) }
+    val center = map.center.toLocation(world)
+
     fun prepareSpawnFor(player: Player) {
         val spawn = spawns.filter { it.isFree() }.random()
         spawn.assignTo(player)
@@ -39,11 +39,10 @@ class SpawnHandler(
     }
 }
 
-@Serializable
-class Spawn(@Contextual val location: Location) {
+class Spawn(world: World, pos: Vector) {
 
-    @Transient
-    private val closure = listOf(
+    val location: Location = pos.toLocation(world)
+    val closure = listOf(
         location.clone().add(0.0, 2.0, 0.0),
         location.clone().add(0.0, 0.0, 1.0),
         location.clone().add(0.0, 1.0, 1.0),
@@ -54,10 +53,8 @@ class Spawn(@Contextual val location: Location) {
         location.clone().add(-1.0, 0.0, 0.0),
         location.clone().add(-1.0, 1.0, 0.0),
     )
-
-    @Transient
     var player: Player? = null
-    @Transient private var armorStand: ArmorStand? = null
+    var armorStand: ArmorStand? = null
 
     fun reset() {
         armorStand?.remove()

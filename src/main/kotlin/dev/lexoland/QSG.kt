@@ -2,7 +2,7 @@ package dev.lexoland
 
 import dev.lexoland.cmd.buildCommand
 import dev.lexoland.cmd.mapCommand
-import dev.lexoland.core.GameManager
+import dev.lexoland.core.Game
 import dev.lexoland.core.loadMaps
 import dev.lexoland.core.saveMaps
 import dev.lexoland.listener.BuildListener
@@ -13,6 +13,7 @@ import dev.lexoland.utils.listeners
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
+import org.bukkit.util.Vector
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -29,7 +30,6 @@ class QSG : JavaPlugin() {
 
     override fun onEnable() {
         LOG.info("Starting!")
-
         commands(
             buildCommand,
             mapCommand
@@ -42,7 +42,7 @@ class QSG : JavaPlugin() {
 
         Bukkit.getScheduler().runTask(this) { _ ->
             loadMaps()
-            GameManager.setup()
+            Game.setup()
         }
     }
 

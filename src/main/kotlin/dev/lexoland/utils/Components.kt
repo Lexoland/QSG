@@ -6,6 +6,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
+import org.bukkit.Location
 import org.bukkit.command.CommandSender
 
 val PREFIX = text("[", rgb(0x43a180)) +
@@ -41,10 +42,13 @@ fun String.format(
     color: TextColor? = null,
     prefix: Component? = null
 ): Component {
-    val text = text(this, color)
+    val text = text(this, color).format(*args)
+    return prefix?.append(text) ?: text
+}
 
+fun Component.format(vararg args: Component): Component {
     var i = 0
-    val replacedText = text.replaceText(TextReplacementConfig.builder()
+    return replaceText(TextReplacementConfig.builder()
         .match("\\{(\\d*)}")
         .replacement { t, _ ->
             val target = t.group(1)
@@ -53,9 +57,13 @@ fun String.format(
             return@replacement args[target.toInt()]
         }
         .build())
-
-    return prefix?.append(replacedText) ?: replacedText
 }
+
+fun textLocation(location: Location) = text("[{}, {}, {}]", NamedTextColor.GRAY).format(
+    text(location.blockX, NamedTextColor.GRAY),
+    text(location.blockY, NamedTextColor.GRAY),
+    text(location.blockZ, NamedTextColor.GRAY)
+)
 
 operator fun Component.plus(other: Component) = append(other)
 

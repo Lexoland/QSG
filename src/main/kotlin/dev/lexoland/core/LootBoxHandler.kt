@@ -1,22 +1,20 @@
 package dev.lexoland.core
 
 import dev.lexoland.PLUGIN
-import dev.lexoland.core.GameManager.randomSource
+import dev.lexoland.core.Game.randomSource
 import dev.lexoland.utils.FilterableWeightedList
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.Serializable
 import org.bukkit.Bukkit
-import org.bukkit.Location
 import org.bukkit.NamespacedKey
+import org.bukkit.World
 import org.bukkit.block.Container
 import org.bukkit.loot.Lootable
 
-class LootBoxHandler(
-    private val lootBoxes: List<LootBox>
-) {
+class LootBoxHandler(world: World, map: Map) {
+
+    val lootBoxes = map.lootBoxes.map { it.toLocation(world) }
 
     fun setup() {
-        lootBoxes.map { it.container }.forEach {
+        lootBoxes.map { it.block.state }.filterIsInstance<Container>().forEach {
             it.inventory.clear()
             if (it !is Lootable)
                 throw IllegalStateException("Container can't posses a loottable")
@@ -42,11 +40,4 @@ class LootBoxHandler(
         .add("good_armor".key(), 5)
 
     private fun String.key() = NamespacedKey(PLUGIN, "qsg/$this")
-}
-
-@Serializable
-class LootBox(
-    @Contextual val location: Location
-) {
-    val container get() = location.block.state as Container
 }

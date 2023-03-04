@@ -13,13 +13,45 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
+import org.bukkit.util.Vector
 
 val module = SerializersModule {
+    contextual(Vector::class, VectorSerializer())
     contextual(Location::class, LocationSerializer())
     contextual(Component::class, ComponentSerializer())
     contextual(World::class, WorldSerializer())
 }
 val jsonFormat = Json { serializersModule = module }
+
+class VectorSerializer : KSerializer<Vector> {
+    override val descriptor = buildClassSerialDescriptor("Vector") {
+        element<Double>("x")
+        element<Double>("y")
+        element<Double>("z")
+    }
+
+    override fun serialize(encoder: Encoder, value: Vector) = encoder.encodeStructure(descriptor) {
+        encodeDoubleElement(descriptor, 0, value.x)
+        encodeDoubleElement(descriptor, 1, value.y)
+        encodeDoubleElement(descriptor, 2, value.z)
+    }
+
+    override fun deserialize(decoder: Decoder): Vector = decoder.decodeStructure(descriptor) {
+        var x = 0.0
+        var y = 0.0
+        var z = 0.0
+        while (true) {
+            when (val index = decodeElementIndex(descriptor)) {
+                0 -> x = decodeDoubleElement(descriptor, 0)
+                1 -> y = decodeDoubleElement(descriptor, 1)
+                2 -> z = decodeDoubleElement(descriptor, 2)
+                CompositeDecoder.DECODE_DONE -> break
+                else -> error("Unexpected index: $index")
+            }
+        }
+        Vector(x, y, z)
+    }
+}
 
 class LocationSerializer : KSerializer<Location> {
     override val descriptor = buildClassSerialDescriptor("Location") {

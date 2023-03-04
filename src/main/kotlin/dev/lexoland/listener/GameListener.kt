@@ -1,7 +1,7 @@
 package dev.lexoland.listener
 
 import dev.lexoland.asId
-import dev.lexoland.core.GameManager
+import dev.lexoland.core.Game
 import dev.lexoland.utils.PREFIX
 import dev.lexoland.utils.plus
 import net.kyori.adventure.text.format.NamedTextColor
@@ -23,26 +23,26 @@ object GameListener : Listener {
 
     @EventHandler
     fun onDeath(e: PlayerDeathEvent) {
-        if(!GameManager.inGame)
+        if(!Game.inGame)
             return
-        GameManager.spawnHandler.onDeath(e.entity)
+        Game.spawnHandler.onDeath(e.entity)
         e.player.gameMode = GameMode.SPECTATOR
         e.deathMessage(PREFIX + e.deathMessage()!!.color(NamedTextColor.RED))
         e.entity.persistentDataContainer[DEATH_KEY, PersistentDataType.INTEGER] = 1 + (e.entity.persistentDataContainer[DEATH_KEY, PersistentDataType.INTEGER] ?: 0)
 
-        if(!GameManager.spawnHandler.hasMoreThanOneSurvivor())
-            GameManager.endGame()
+        if(!Game.spawnHandler.hasMoreThanOneSurvivor())
+            Game.endGame()
     }
 
     @EventHandler
     fun cancelDamage(e: EntityDamageEvent) {
-        if(!GameManager.inGame)
+        if(!Game.inGame)
             e.isCancelled = true
     }
 
     @EventHandler
     fun cancelDamage(e: EntityDamageByEntityEvent) {
-        if(!GameManager.preparation)
+        if(!Game.preparation)
             return
         val damager = e.damager
         val entity = e.entity
@@ -53,14 +53,14 @@ object GameListener : Listener {
 
     @EventHandler
     fun cancelFood(e: FoodLevelChangeEvent) {
-        if(!GameManager.inGame)
+        if(!Game.inGame)
             return
         e.isCancelled = true
     }
 
     @EventHandler
     fun cancelChestOpen(e: InventoryOpenEvent) {
-        if(e.inventory.holder != e.player && !GameManager.started)
+        if(e.inventory.holder != e.player && !Game.started)
             e.isCancelled = true
     }
 }

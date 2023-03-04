@@ -1,8 +1,8 @@
 package dev.lexoland.listener
 
 import com.destroystokyo.paper.event.block.TNTPrimeEvent
-import dev.lexoland.core.LootBox
 import dev.lexoland.core.map
+import dev.lexoland.utils.blockPosEqual
 import dev.lexoland.utils.text
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.JoinConfiguration
@@ -39,7 +39,7 @@ object BuildListener : Listener {
             val map = e.block.world.map
             if (map != null) {
                 e.player.sendMessage(textFactory(addedText, map.displayName, e.block.translationKey(), e.block.location))
-                map.lootBoxes.add(LootBox(e.block.location))
+                map.lootBoxes.add(e.block.location.toVector())
             }
         }
     }
@@ -50,9 +50,9 @@ object BuildListener : Listener {
             e.isCancelled = true
         } else if (e.block.state is Container) {
             val map = e.block.world.map
-            if (map != null && map.lootBoxes.any { it.location == e.block.location }) {
+            if (map != null && map.lootBoxes.any { it blockPosEqual e.block.location }) {
                 e.player.sendMessage(textFactory(removedText, map.displayName, e.block.translationKey(), e.block.location))
-                map.lootBoxes.removeIf { it.location == e.block.location }
+                map.lootBoxes.removeIf { it blockPosEqual e.block.location }
             }
         }
     }

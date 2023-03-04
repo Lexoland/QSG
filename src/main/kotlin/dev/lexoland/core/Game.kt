@@ -11,23 +11,26 @@ import net.kyori.adventure.title.Title
 import net.kyori.adventure.title.TitlePart
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
+import org.bukkit.World
+import org.bukkit.WorldCreator
 import org.bukkit.entity.ExperienceOrb
 import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import org.bukkit.entity.Projectile
+import java.io.File
 
-object GameManager {
+object Game {
 
     val randomSource = Random().asKotlinRandom()
 
-    private lateinit var map: Map
-    private lateinit var lootBoxHandler: LootBoxHandler
+    lateinit var gameWorld: World
+    lateinit var map: Map
+    lateinit var lootBoxHandler: LootBoxHandler
     lateinit var spawnHandler: SpawnHandler
     var started = false
     var inGame = false
     var preparation = true
 
-    private var startCountdown = 10
     private var preparationTime = 15
 
     fun setup() {
@@ -38,15 +41,20 @@ object GameManager {
             }
             it
         }
-        LOG.info("Selected map ${map.name}")
-        spawnHandler = SpawnHandler(map.center, map.spawns)
-        lootBoxHandler = LootBoxHandler(map.lootBoxes)
+        swapGameWorld(map)?.let {
+            gameWorld = it
+            spawnHandler = SpawnHandler(gameWorld, map)
+            lootBoxHandler = LootBoxHandler(gameWorld, map)
+            LOG.info("Selected map ${map.name}")
+            return
+        }
+        LOG.error("Failed to swap map: ${map.name}")
     }
 
     fun join(player: Player) {
         if(started) {
             player.gameMode = GameMode.SPECTATOR
-            player.teleportAsync(map.center.add(0.0, 10.0, 0.0))
+            player.teleportAsync(map.center.toLocation(gameWorld))
             return
         }
 
@@ -69,12 +77,12 @@ object GameManager {
         started = true
         inGame = true
         preparation = true
-        startCountdown = 10
         preparationTime = 15
         lootBoxHandler.setup()
 
+        var countdown = 10
         Bukkit.getScheduler().runTaskTimer(PLUGIN, { task ->
-            if (startCountdown == 0) {
+            if (countdown == 0) {
                 task.cancel()
                 spawnHandler.spawns.forEach {
                     it.player!!.inventory.clear()
@@ -89,12 +97,12 @@ object GameManager {
                 p.sendTitlePart(TitlePart.TITLE, text("Spiel startet in", NamedTextColor.WHITE))
                 p.sendTitlePart(
                     TitlePart.SUBTITLE,
-                    text("$startCountdown", NamedTextColor.WHITE)
+                    text("$countdown", NamedTextColor.WHITE)
                         .append(text("s", NamedTextColor.GRAY))
                 )
                 p.sendTitlePart(TitlePart.TIMES, Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ofSeconds(1)))
             }
-            startCountdown--
+            countdown--
         }, 0, 1)
     }
 
@@ -116,28 +124,39 @@ object GameManager {
     fun endGame() {
         inGame = false
         preparation = true
-        startCountdown = 5
 
+        var countdown = 5
         Bukkit.getScheduler().runTaskTimer(PLUGIN, { task ->
-            if (startCountdown == 0) {
+            if (countdown == 0) {
                 task.cancel()
                 restart()
                 return@runTaskTimer
             }
-            map.world.players.forEach {
+            Bukkit.getOnlinePlayers().forEach {
                 val p = it.player ?: return@forEach
-                p.sendMessage(text("Das Spiel endet in ${startCountdown}s", NamedTextColor.WHITE))
+                p.sendMessage(text("Das Spiel endet in ${countdown}s", NamedTextColor.WHITE))
             }
-            startCountdown--
+            countdown--
         }, 0, 20)
     }
 
     private fun restart() {
-        map.world.entities.forEach {
-            if(it is Item || it is Projectile || it is ExperienceOrb)
-                it.remove()
-        }
         setup()
-        map.world.players.forEach { join(it) }
+        Bukkit.getOnlinePlayers().forEach { join(it) }
+    }
+
+
+    private const val GAME_WORLD_NAME = "game"
+
+    private fun swapGameWorld(map: Map): World? {
+        if (!Bukkit.unloadWorld(GAME_WORLD_NAME, false)) {
+            LOG.error("Could not unload world $GAME_WORLD_NAME")
+            return null
+        }
+        val gameWorldDir = File(GAME_WORLD_NAME)
+        if (!gameWorldDir.deleteRecursively())
+            LOG.warn("Could not delete world directory $gameWorldDir")
+        File(map.name).copyRecursively(gameWorldDir)
+        return Bukkit.createWorld(WorldCreator.name(GAME_WORLD_NAME))
     }
 }
