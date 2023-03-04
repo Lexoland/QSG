@@ -7,9 +7,3 @@ website: https://www.youtube.com/watch?v=dQw4w9WgXcQ
 api-version: 1.19
 
 commands:
-  build:
-    description: "Build command."
-    usage: "/build | /b"
-    aliases: [ b, build ]
-    permission: qsg.command.build
-    permission-message: "no!"

@@ -1,7 +1,10 @@
 package dev.lexoland
 
-import dev.lexoland.cmd.BuildCommand
+import de.leximon.api.command.CommandAPI
+import dev.lexoland.cmd.buildCommand
 import dev.lexoland.listener.BuildListener
+import dev.lexoland.utils.commands
+import dev.lexoland.utils.listeners
 import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 import org.slf4j.LoggerFactory
@@ -16,9 +19,9 @@ class QSG : JavaPlugin() {
 
     override fun onEnable() {
         log.info("Starting!")
-        val pm = Bukkit.getPluginManager()
-        pm.registerEvents(BuildListener, this)
-        getCommand("build")!!.setExecutor(BuildCommand)
+
+        commands(buildCommand)
+        listeners(BuildListener)
     }
 
     companion object {
