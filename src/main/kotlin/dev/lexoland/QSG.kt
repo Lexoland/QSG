@@ -1,41 +1,41 @@
 package dev.lexoland
 
 import dev.lexoland.cmd.buildCommand
+import dev.lexoland.cmd.spawnCommand
 import dev.lexoland.core.MapData
 import dev.lexoland.listener.BuildListener
 import dev.lexoland.utils.commands
 import dev.lexoland.utils.listeners
 import java.util.UUID
-import net.kyori.adventure.text.Component
 import org.bukkit.World
 import org.bukkit.plugin.java.JavaPlugin
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
+val LOG = LoggerFactory.getLogger("QSG") as Logger
+lateinit var PLUGIN: QSG
 
 class QSG : JavaPlugin() {
 
     override fun onLoad() {
-        plugin = this
+        PLUGIN = this
     }
 
     override fun onEnable() {
-        log.info("Starting!")
+        LOG.info("Starting!")
 
-        commands(buildCommand)
+        commands(
+            buildCommand,
+            spawnCommand
+        )
         listeners(BuildListener)
     }
 
     companion object {
-        lateinit var plugin: QSG
-        val log = LoggerFactory.getLogger("QSG")
-
         private val worldToMap = mutableMapOf<UUID, MapData>()
 
-        fun registerMap(world: World, name: Component) {
-            worldToMap[world.uid] = MapData(world, name)
-        }
+        fun registerMap(map: MapData) = worldToMap.put(map.world.uid, map)
 
-        fun getMap(world: World): MapData? {
-            return worldToMap[world.uid]
-        }
+        fun getMap(world: World) = worldToMap[world.uid]
     }
 }
