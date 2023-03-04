@@ -28,7 +28,7 @@ val mapCommand = brigadierCommand("map") {
                 val name = StringArgumentType.getString(context, "name")
                 Bukkit.getScheduler().runTask(PLUGIN) { _ ->
                     val world = WorldCreator.ofNameAndKey(name, name.asId())
-                        .environment(World.Environment.CUSTOM)
+                        .environment(World.Environment.NORMAL)
                         .type(WorldType.FLAT)
                         .generateStructures(false)
                         .generatorSettings("{\"lakes\": false, \"features\": true, \"biome\": \"minecraft:the_void\", \"structure_overrides\": [], \"layers\": [{\"height\": 1, \"block\": \"minecraft:air\"}]}")
