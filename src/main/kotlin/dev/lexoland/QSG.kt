@@ -10,10 +10,18 @@ class QSG : JavaPlugin() {
 
     val log = LoggerFactory.getLogger("QSG")
 
+    override fun onLoad() {
+        plugin = this
+    }
+
     override fun onEnable() {
         log.info("Starting!")
         val pm = Bukkit.getPluginManager()
         pm.registerEvents(BuildListener, this)
         getCommand("build")!!.setExecutor(BuildCommand)
+    }
+
+    companion object {
+        lateinit var plugin: QSG
     }
 }

@@ -1,12 +1,11 @@
 package dev.lexoland.listener
 
 import com.destroystokyo.paper.event.block.TNTPrimeEvent
-import dev.lexoland.core.LootManager
-import java.util.Locale
+import dev.lexoland.core.GameManager
+import dev.lexoland.core.Loot
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.JoinConfiguration
 import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.TextColor
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Container
@@ -36,7 +35,7 @@ object BuildListener : Listener {
             }
         } else if (e.block.state is Container) {
             e.player.sendMessage(textFactory(addedText, e.block.translationKey(), e.block.location))
-            LootManager.containers.add(e.block.state as Container)
+            Loot.containers.add(e.block.state as Container)
         }
     }
 
@@ -44,9 +43,9 @@ object BuildListener : Listener {
     fun cancelBuild(e: BlockBreakEvent) {
         if (!allowed.contains(e.player)) {
             e.isCancelled = true
-        } else if (e.block.state is Container && LootManager.containers.contains(e.block.state)) {
+        } else if (e.block.state is Container && Loot.containers.contains(e.block.state)) {
             e.player.sendMessage(textFactory(removedText, e.block.translationKey(), e.block.location))
-            LootManager.containers.remove(e.block.state)
+            Loot.containers.remove(e.block.state)
         }
     }
 
