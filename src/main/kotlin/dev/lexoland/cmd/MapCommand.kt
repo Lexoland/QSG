@@ -1,5 +1,6 @@
 package dev.lexoland.cmd
 
+import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
 import com.mojang.brigadier.suggestion.SuggestionProvider
@@ -12,6 +13,8 @@ import dev.lexoland.core.map
 import dev.lexoland.core.maps
 import dev.lexoland.core.registerMap
 import dev.lexoland.utils.*
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Bukkit
 import org.bukkit.WorldCreator
 import org.bukkit.entity.Player
@@ -87,6 +90,20 @@ val mapCommand = brigadierCommand("map") {
 
                 map.spawns.remove(spawn)
                 sender.respond("Spawn removed.")
+                return@executes 1
+            }
+        }
+    }
+
+    literal("enable") {
+        argument("value", BoolArgumentType.bool()) {
+            executes<Player> { sender, context ->
+                val map = sender.world.map ?: throw EXCEPTION_NOT_ON_MAP.create()
+                map.enabled = BoolArgumentType.getBool(context, "value")
+                sender.respond(
+                    "Map {} has been {}.", map.displayName,
+                    if (map.enabled) text("enabled", NamedTextColor.GREEN, TextDecoration.ITALIC) else text("disabled", NamedTextColor.RED, TextDecoration.ITALIC)
+                )
                 return@executes 1
             }
         }

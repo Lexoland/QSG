@@ -1,11 +1,13 @@
 package dev.lexoland.utils
 
+import dev.lexoland.PLUGIN
 import org.bukkit.Bukkit
 import org.bukkit.World
 import org.bukkit.WorldCreator
 import org.bukkit.WorldType
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
+import org.bukkit.scheduler.BukkitTask
 
 fun JavaPlugin.listeners(vararg listeners: Listener) = Bukkit.getPluginManager().apply {
     for (listener in listeners)
