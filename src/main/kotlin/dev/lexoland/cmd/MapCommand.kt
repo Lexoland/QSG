@@ -8,35 +8,25 @@ import de.leximon.api.command.Arguments
 import de.leximon.api.command.Suggestions
 import dev.lexoland.PLUGIN
 import dev.lexoland.asId
+import dev.lexoland.core.*
 import dev.lexoland.core.Map
-import dev.lexoland.core.map
-import dev.lexoland.core.maps
-import dev.lexoland.core.registerMap
-import dev.lexoland.core.saveMaps
-import dev.lexoland.utils.argument
-import dev.lexoland.utils.blockCentered
-import dev.lexoland.utils.blockPosEqual
-import dev.lexoland.utils.brigadierCommand
-import dev.lexoland.utils.executes
-import dev.lexoland.utils.literal
-import dev.lexoland.utils.presetVoid
-import dev.lexoland.utils.respond
-import dev.lexoland.utils.text
-import dev.lexoland.utils.textLocation
-import dev.lexoland.utils.toBlockVector
-import java.util.Locale
+import dev.lexoland.utils.*
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Bukkit
 import org.bukkit.WorldCreator
 import org.bukkit.entity.Player
+import java.util.*
 
 val EXCEPTION_NOT_ON_MAP = SimpleCommandExceptionType { "You are not on a map" }
 val EXCEPTION_INVALID_MAP = SimpleCommandExceptionType { "Invalid map" }
 val EXCEPTION_NO_SPAWN = SimpleCommandExceptionType { "There is no spawn at your location" }
 val SUGGESTIONS_MAPS: SuggestionProvider<*> = Suggestions.list({ maps.values }, { it.name }).build()
 
-val mapCommand = brigadierCommand("map") {
+val mapCommand = brigadierCommand(
+    "map",
+    permissions = arrayOf("qsg.command.map")
+) {
     literal("create") {
         argument("name", StringArgumentType.word()) {
             argument("displayName", Arguments.Component.component()) {

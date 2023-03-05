@@ -38,7 +38,7 @@ object GameListener : Listener {
             player.teleportToGameCenter()
 
         if(!Game.moreThanOneSurvivorAlive())
-            Game.endGame(e.player.killer)
+            Game.endGame()
     }
 
     @EventHandler

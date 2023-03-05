@@ -2,6 +2,7 @@ package dev.lexoland
 
 import dev.lexoland.cmd.buildCommand
 import dev.lexoland.cmd.mapCommand
+import dev.lexoland.cmd.timerCommand
 import dev.lexoland.core.Game
 import dev.lexoland.core.loadMaps
 import dev.lexoland.core.saveMaps
@@ -13,7 +14,6 @@ import dev.lexoland.utils.listeners
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
-import org.bukkit.util.Vector
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -32,7 +32,8 @@ class QSG : JavaPlugin() {
         LOG.info("Starting!")
         commands(
             buildCommand,
-            mapCommand
+            mapCommand,
+            timerCommand
         )
         listeners(
             BuildListener,

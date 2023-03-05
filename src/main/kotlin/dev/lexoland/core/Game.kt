@@ -81,7 +81,7 @@ object Game {
 
         if (state != GameState.LOBBY && state != GameState.ENDING)
             if (!moreThanOneSurvivorAlive())
-                endGame(players.values.firstOrNull { !it.spectating }?.player)
+                endGame()
     }
 
     fun startGame() {
@@ -128,13 +128,14 @@ object Game {
         }, start = true)
     }
 
-    fun endGame(winner: Player?) {
+    fun endGame() {
         state = GameState.ENDING
         preparationCountdown?.stop()
         safeTimeCountdown?.stop()
         worldBorderCountdown?.stop()
         drawCountdown?.stop()
 
+        val winner = players.values.firstOrNull { !it.spectating }?.player
         val winnerName = winner?.name ?: "Niemand"
 
         eachPlayers {

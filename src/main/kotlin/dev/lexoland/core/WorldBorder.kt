@@ -38,5 +38,5 @@ class DrawCountdown : Countdown(20, 30, ::onDraw, start = true) {
 }
 
 private fun onDraw() {
-    Game.endGame(null)
+    Game.endGame()
 }
