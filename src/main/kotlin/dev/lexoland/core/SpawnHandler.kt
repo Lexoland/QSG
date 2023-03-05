@@ -1,5 +1,6 @@
 package dev.lexoland.core
 
+import dev.lexoland.utils.blockCentered
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.World
@@ -14,7 +15,7 @@ import kotlin.math.atan2
 
 class SpawnHandler(world: World, map: Map) {
 
-    val center = map.center.toLocation(world)
+    val center = map.center.toLocation(world).blockCentered()
     val spawns = map.spawns.map { Spawn(world, it) }
 
     fun assignSpawn(player: Player) {
@@ -33,7 +34,7 @@ class SpawnHandler(world: World, map: Map) {
 
     inner class Spawn(world: World, pos: Vector) {
 
-        val location: Location = pos.toLocation(world).apply {
+        val location: Location = pos.toLocation(world).blockCentered().apply {
             val angle = atan2((x - center.x), (z - center.z))
             yaw = Math.toDegrees(angle).toFloat()
         }

@@ -8,10 +8,8 @@ import de.leximon.api.command.Arguments
 import de.leximon.api.command.Suggestions
 import dev.lexoland.PLUGIN
 import dev.lexoland.asId
+import dev.lexoland.core.*
 import dev.lexoland.core.Map
-import dev.lexoland.core.map
-import dev.lexoland.core.maps
-import dev.lexoland.core.registerMap
 import dev.lexoland.utils.*
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -56,7 +54,7 @@ val mapCommand = brigadierCommand("map") {
 
                 sender.respond("Teleporting to map {}...", map.displayName)
                 val world = Bukkit.createWorld(WorldCreator.ofKey(name.asId()))!!
-                sender.teleport(map.center.toLocation(world))
+                sender.teleport(map.center.toLocation(world).blockCentered())
                 sender.respond("Teleported!")
                 return@executes 1
             }
@@ -66,7 +64,7 @@ val mapCommand = brigadierCommand("map") {
     literal("center") {
         executes<Player> { sender, _ ->
             val map = sender.world.map ?: throw EXCEPTION_NOT_ON_MAP.create()
-            map.center = sender.location.toVector()
+            map.center = sender.location.toBlockVector()
             sender.respond("Center set to {}.", textLocation(sender.location))
             return@executes 1
         }
@@ -76,7 +74,7 @@ val mapCommand = brigadierCommand("map") {
         literal("add") {
             executes<Player> { sender, _ ->
                 val map = sender.world.map ?: throw EXCEPTION_NOT_ON_MAP.create()
-                map.spawns.add(sender.location.toVector())
+                map.spawns.add(sender.location.toBlockVector())
                 sender.respond("Spawn set to {}.", textLocation(sender.location))
                 return@executes 1
             }
@@ -106,6 +104,14 @@ val mapCommand = brigadierCommand("map") {
                 )
                 return@executes 1
             }
+        }
+    }
+
+    literal("saveAll") {
+        executes { sender, _ ->
+            saveMaps()
+            sender.respond("All maps have been saved.")
+            return@executes 1
         }
     }
 }

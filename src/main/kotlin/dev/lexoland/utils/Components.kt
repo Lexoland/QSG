@@ -6,6 +6,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.command.CommandSender
 
@@ -36,6 +37,17 @@ fun CommandSender.respond(
     color: TextColor = NamedTextColor.YELLOW,
     prefix: Component = PREFIX
 ) = sendMessage(message.format(*args, color = color, prefix = prefix))
+
+fun broadcast(
+    message: String,
+    vararg args: Component,
+    color: TextColor = NamedTextColor.YELLOW,
+    prefix: Component = PREFIX
+) = Bukkit.broadcast(message.format(*args, color = color, prefix = prefix))
+
+fun broadcast(
+    message: Component
+) = Bukkit.broadcast(message)
 
 fun String.format(
     vararg args: Component,

@@ -3,20 +3,20 @@ package dev.lexoland.core
 import dev.lexoland.LOG
 import dev.lexoland.PLUGIN
 import dev.lexoland.asId
-import dev.lexoland.utils.PREFIX
-import dev.lexoland.utils.plus
-import dev.lexoland.utils.text
+import dev.lexoland.utils.*
 import net.kyori.adventure.bossbar.BossBar
-import java.time.Duration
-import kotlin.random.asKotlinRandom
 import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.title.Title
-import net.kyori.adventure.title.TitlePart
-import org.bukkit.*
+import org.bukkit.Bukkit
+import org.bukkit.Sound
+import org.bukkit.World
+import org.bukkit.WorldCreator
 import org.bukkit.entity.Player
 import java.io.File
 import java.util.*
 import kotlin.math.ceil
+import kotlin.random.asKotlinRandom
+
+const val MIN_PLAYERS = 2
 
 object Game {
 
@@ -75,9 +75,14 @@ object Game {
     }
 
     fun startGame() {
+        if (players.size < MIN_PLAYERS) { // just in case
+            GameStartCountdown.reset()
+            GameStartCountdown.update()
+            return
+        }
         for (qsgPlayer in players.values)
             qsgPlayer.player.hideBossBar(GameStartCountdown.bossBar)
-        Bukkit.broadcast(PREFIX + text("Das Spiel spielt", NamedTextColor.WHITE))
+        broadcast("Das Spiel startet jetzt!", color = NamedTextColor.GRAY)
 //        started = true
 //        inGame = true
 //        preparation = true
@@ -172,7 +177,7 @@ object GameStartCountdown : Countdown(1, 30 * 20, Game::startGame) {
     var waiting = true
 
     fun update() {
-        if (Game.players.size < 2) {
+        if (Game.players.size < MIN_PLAYERS) {
             waiting = true
         } else if (waiting) {
             waiting = false
@@ -184,33 +189,42 @@ object GameStartCountdown : Countdown(1, 30 * 20, Game::startGame) {
 
     override fun tick() {
         if (waiting) {
-            val dots = text(when (Bukkit.getCurrentTick() / 20 % 4) {
+            val dots = when (Bukkit.getCurrentTick() / 20 % 4) {
                 0 -> "."
                 1 -> ".."
                 2 -> "..."
                 else -> ""
-            }, NamedTextColor.YELLOW)
-            bossBar.name(text("Warte auf Spieler", NamedTextColor.YELLOW) + dots)
+            }
+            bossBar.name(gradient("Warte auf Spieler$dots", rgb(0xffff00), rgb(0xffc800)))
             bossBar.progress(1f)
             bossBar.color(BossBar.Color.YELLOW)
             bossBar.overlay(BossBar.Overlay.PROGRESS)
             return
         }
-        bossBar.name(
-            text("Spiel startet in ", NamedTextColor.GREEN) + text(
-                "${ceil(timeLeft / 20f)}s",
-                NamedTextColor.AQUA
-            )
-        )
+        bossBar.name(gradient("Spiel startet in ", rgb(0x00ff00), rgb(0x6aff00)) + text("${ceil(timeLeft / 20f).toInt()}s", NamedTextColor.AQUA))
         bossBar.progress(timeLeft.toFloat() / initialTime)
         bossBar.color(BossBar.Color.GREEN)
         bossBar.overlay(BossBar.Overlay.PROGRESS)
+        when(timeLeft) {
+            30 * 20 -> broadcastRemainingTime(30)
+            15 * 20 -> broadcastRemainingTime(10)
+            5 * 20 -> broadcastRemainingTime(5)
+            4 * 20 -> broadcastRemainingTime(4)
+            3 * 20 -> broadcastRemainingTime(3)
+            2 * 20 -> broadcastRemainingTime(2)
+            1 * 20 -> broadcastRemainingTime(1)
+        }
+    }
+
+    private fun broadcastRemainingTime(time: Int) {
+        broadcast("Das Spiel startet in {}", text("${time}s", NamedTextColor.AQUA), color = NamedTextColor.GRAY)
+        Bukkit.getOnlinePlayers().forEach { it.playSound(it.location, Sound.UI_BUTTON_CLICK, 1000f, 2f) }
     }
 
 }
 
 fun Player.teleportToLobby() {
-    this.teleport(Bukkit.getWorld("world")!!.spawnLocation)
+    this.teleport(Bukkit.getWorld("world")!!.spawnLocation.blockCentered())
 }
 
 fun Player.teleportToGameCenter() {
