@@ -1,7 +1,6 @@
 package dev.lexoland.core
 
 import dev.lexoland.utils.blockCentered
-import kotlin.math.atan2
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.World
@@ -10,25 +9,25 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.util.Vector
+import kotlin.math.atan2
 
 class SpawnHandler(world: World, map: Map) {
 
     val center = map.center.toLocation(world).blockCentered()
     val spawns = map.spawns.map { Spawn(world, it) }
 
-    fun assignSpawn(player: Player) {
-        val spawn = spawns.filter { it.isFree() }.random()
+    fun assignSpawn(player: Player): Boolean {
+        val spawn = spawns.filter { it.isFree() }.randomOrNull() ?: return false
         spawn.teleportAndEnclose(player)
+        return true
     }
 
     fun uncloseAll() {
         spawns.forEach { it.unclosePlayer() }
     }
 
-    fun hasMoreThanOneSurvivor() = spawns.count { !it.isFree() } > 1
-
-    fun onDeath(player: Player) {
-        val spawn = spawns.first { it.player == player }
+    fun resetSpawn(player: Player) {
+        val spawn = spawns.firstOrNull() { it.player == player } ?: return
         spawn.reset()
     }
 

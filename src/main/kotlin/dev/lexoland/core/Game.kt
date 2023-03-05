@@ -1,23 +1,8 @@
 package dev.lexoland.core
 
 import dev.lexoland.LOG
-import dev.lexoland.PLUGIN
 import dev.lexoland.asId
-import dev.lexoland.utils.blockCentered
-import dev.lexoland.utils.broadcast
-import dev.lexoland.utils.gradient
-import dev.lexoland.utils.hsv
-import dev.lexoland.utils.plus
-import dev.lexoland.utils.rgb
-import dev.lexoland.utils.text
-import dev.lexoland.utils.times
-import java.io.File
-import java.util.Random
-import java.util.UUID
-import kotlin.math.ceil
-import kotlin.random.asKotlinRandom
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
+import dev.lexoland.utils.*
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -27,6 +12,12 @@ import org.bukkit.Sound
 import org.bukkit.World
 import org.bukkit.WorldCreator
 import org.bukkit.entity.Player
+import java.io.File
+import java.util.*
+import kotlin.math.ceil
+import kotlin.random.asKotlinRandom
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 const val MIN_PLAYERS = 2
 
@@ -43,6 +34,7 @@ object Game {
     val players = mutableMapOf<UUID, QSGPlayer>()
 
     val gameStartCountdown = GameStartCountdown()
+    var preparationCountdown: SimpleCountdown? = null
     var safeTimeCountdown: SafeTimeCountdown? = null
     var worldBorderCountdown: WorldBorderCountdown? = null
     var drawCountdown: DrawCountdown? = null
@@ -71,7 +63,7 @@ object Game {
         val qsgPlayer = QSGPlayer(player)
         players[player.uniqueId] = qsgPlayer
         if (state != GameState.LOBBY) {
-            safeTimeCountdown?.let { player.showBossBar(it.bossBar) }
+            safeTimeCountdown?.takeIf { it.running }?.addPlayer(player)
             qsgPlayer.setToSpectator()
             return
         }
@@ -84,6 +76,12 @@ object Game {
         players.remove(player.uniqueId)
         gameStartCountdown.removePlayer(player)
         gameStartCountdown.update()
+        safeTimeCountdown?.removePlayer(player)
+        spawnHandler.resetSpawn(player)
+
+        if (state != GameState.LOBBY && state != GameState.ENDING)
+            if (!moreThanOneSurvivorAlive())
+                endGame(players.values.firstOrNull { !it.spectating }?.player)
     }
 
     fun startGame() {
@@ -93,12 +91,15 @@ object Game {
             return
         }
         broadcast("Das Spiel startet jetzt!", color = NamedTextColor.GRAY)
-        eachPlayers { spawnHandler.assignSpawn(it) }
+        players.values.shuffled().forEach {
+            if (!spawnHandler.assignSpawn(it.player))
+                it.setToSpectator()
+        }
         lootBoxHandler.setup()
         state = GameState.PREPARATION
 
         fun display(time: Int, large: Boolean) = eachPlayers {
-            val color = hsv(time / 10f * 0.33f, 1f, 1f)
+            val color = hsv((1f - time / 10f) * 0.33f, 1f, 1f)
             if (large) {
                 it.showTitle(Title.title(
                     text(if (time == 0) "Los!" else time, color = color),
@@ -115,7 +116,7 @@ object Game {
             ))
         }
 
-        SimpleCountdown(20, 10, { time ->
+        preparationCountdown = SimpleCountdown(20, 10, { time ->
             display(time, time <= 3)
         }, {
             display(0, true)
@@ -124,11 +125,13 @@ object Game {
 
             worldBorderCountdown = WorldBorderCountdown()
             safeTimeCountdown = SafeTimeCountdown()
-        }).start()
+        }, start = true)
     }
 
     fun endGame(winner: Player?) {
         state = GameState.ENDING
+        preparationCountdown?.stop()
+        safeTimeCountdown?.stop()
         worldBorderCountdown?.stop()
         drawCountdown?.stop()
 
@@ -142,27 +145,24 @@ object Game {
             ))
         }
 
-        var countdown = 5
-        Bukkit.getScheduler().runTaskTimer(PLUGIN, { task ->
-            if (countdown == 0) {
-                task.cancel()
-                restart()
-                return@runTaskTimer
-            }
-            Bukkit.getOnlinePlayers().forEach {
-                val p = it.player ?: return@forEach
-                p.sendMessage(text("Das Spiel endet in ${countdown}s", NamedTextColor.WHITE))
-            }
-            countdown--
-        }, 0, 20)
+        SimpleCountdown(20, 5, { time ->
+            broadcast("Das Spiel endet in {}", text("${time}s", NamedTextColor.RED), color = NamedTextColor.GRAY)
+        }, {
+            restart()
+            broadcast("Das Spiel wurde beendet!", color = NamedTextColor.GRAY)
+        }).start()
     }
 
     private fun restart() {
         state = GameState.LOBBY
         eachPlayers { it.teleportToLobby() }
         setup()
+        gameStartCountdown.reset()
+        players.clear()
         Bukkit.getOnlinePlayers().forEach { addPlayer(it) }
     }
+
+    fun moreThanOneSurvivorAlive() = players.values.count { !it.spectating } > 1
 
     private const val GAME_WORLD_NAME = "game"
 

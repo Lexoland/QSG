@@ -19,6 +19,7 @@ abstract class Countdown(
             start()
         }
     lateinit var task: BukkitTask
+    val running get() = this::task.isInitialized && !task.isCancelled
 
     init {
         if (start)
@@ -46,11 +47,13 @@ abstract class Countdown(
 
     fun stop() {
         task.cancel()
+        stopped()
     }
 
     abstract fun tick()
 
     protected open fun finished() {}
+    protected open fun stopped() {}
 
     fun reset() {
         timeLeft = initialTime + 1
@@ -87,6 +90,8 @@ abstract class BossBarCountdown(
     override fun finished() {
         players.forEach { it.hideBossBar(bossBar) }
     }
+
+    override fun stopped() = finished()
 
     fun addPlayer(player: Player) {
         players.add(player)
