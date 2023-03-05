@@ -4,9 +4,7 @@ import dev.lexoland.asId
 import dev.lexoland.core.Game
 import dev.lexoland.core.GameState
 import dev.lexoland.core.qsg
-import dev.lexoland.utils.PREFIX
-import dev.lexoland.utils.plus
-import net.kyori.adventure.text.format.NamedTextColor
+import dev.lexoland.utils.*
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -31,7 +29,7 @@ object GameListener : Listener {
 
         e.isCancelled = true
         e.droppedExp += 5
-        e.deathMessage(PREFIX + e.deathMessage()!!.color(NamedTextColor.RED))
+        broadcast(PREFIX + text("☠ ", rgb(0xFF0000)) + e.deathMessage()!!.color(rgb(0xaa0000)))
         Game.spawnHandler.onDeath(player)
         player.persistentDataContainer[DEATH_KEY, PersistentDataType.INTEGER] = 1 + (player.persistentDataContainer[DEATH_KEY, PersistentDataType.INTEGER] ?: 0)
         qsgPlayer.setToSpectator()
