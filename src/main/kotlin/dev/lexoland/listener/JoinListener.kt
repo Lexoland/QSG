@@ -12,7 +12,8 @@ object JoinListener : Listener {
     @EventHandler
     fun onJoin(e: PlayerJoinEvent) {
         e.joinMessage(PREFIX + gradient("» ${e.player.name}", rgb(0x00ff00), rgb(0x00aa00)))
-        Game.join(e.player)
+        if (Game.initialized)
+            Game.join(e.player)
     }
 
     @EventHandler

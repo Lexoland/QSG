@@ -29,13 +29,14 @@ val mapCommand = brigadierCommand("map") {
                     val name = StringArgumentType.getString(context, "name")
                     val displayName = Arguments.Component.getComponent(context, "displayName")
                     Bukkit.getScheduler().runTask(PLUGIN) { _ ->
-                        val world = WorldCreator.ofNameAndKey(name, name.asId())
+                        sender.respond("Generating world...")
+                        val world = WorldCreator.ofKey(name.asId())
                             .presetVoid()
                             .createWorld()!!
 
                         registerMap(Map(name, displayName))
-                        sender.respond("Map {} created.", displayName)
-                        sender.teleportAsync(world.spawnLocation)
+                        sender.respond("Map {} has been created created.", displayName)
+                        sender.teleport(world.spawnLocation)
                     }
                     return@executes 1
                 }
@@ -49,9 +50,11 @@ val mapCommand = brigadierCommand("map") {
             executes<Player> { sender, context ->
                 val name = StringArgumentType.getString(context, "map")
                 val map = maps[name] ?: throw EXCEPTION_INVALID_MAP.create()
-                val world = Bukkit.createWorld(WorldCreator.ofNameAndKey(name, name.asId()))!!
 
-                sender.teleportAsync(map.center.toLocation(world))
+                sender.respond("Teleporting to map {}...", map.displayName)
+                val world = Bukkit.createWorld(WorldCreator.ofKey(name.asId()))!!
+                sender.teleport(map.center.toLocation(world))
+                sender.respond("Teleported!")
                 return@executes 1
             }
         }

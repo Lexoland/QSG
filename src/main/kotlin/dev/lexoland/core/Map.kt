@@ -19,6 +19,7 @@ data class Map(
     val name: String,
     val displayName: @Contextual Component
 ) {
+    var enabled = false
     var center: @Contextual Vector = Vector(0, 64, 0)
     val spawns = mutableListOf<@Contextual Vector>()
     val lootBoxes = mutableListOf<@Contextual Vector>()
@@ -28,7 +29,7 @@ val maps = mutableMapOf<String, Map>()
 
 val World.map get() = maps[name]
 
-fun randomMap() = maps.values.randomOrNull()
+fun randomMap() = maps.values.filter { it.enabled }.randomOrNull()
 
 fun registerMap(map: Map) {
     maps[map.name] = map

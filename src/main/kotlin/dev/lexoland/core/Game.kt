@@ -2,6 +2,7 @@ package dev.lexoland.core
 
 import dev.lexoland.LOG
 import dev.lexoland.PLUGIN
+import dev.lexoland.asId
 import dev.lexoland.utils.text
 import java.time.Duration
 import java.util.Random
@@ -30,8 +31,9 @@ object Game {
     var started = false
     var inGame = false
     var preparation = true
+    var preparationTime = 15
 
-    private var preparationTime = 15
+    val initialized get() = this::map.isInitialized
 
     fun setup() {
         map = randomMap().let {
@@ -52,9 +54,9 @@ object Game {
     }
 
     fun join(player: Player) {
-        if(started) {
+        if (started) {
             player.gameMode = GameMode.SPECTATOR
-            player.teleportAsync(map.center.toLocation(gameWorld))
+            player.teleport(map.center.toLocation(gameWorld))
             return
         }
 
@@ -149,14 +151,16 @@ object Game {
     private const val GAME_WORLD_NAME = "game"
 
     private fun swapGameWorld(map: Map): World? {
-        if (!Bukkit.unloadWorld(GAME_WORLD_NAME, false)) {
-            LOG.error("Could not unload world $GAME_WORLD_NAME")
-            return null
-        }
+        if (!Bukkit.unloadWorld(GAME_WORLD_NAME, false))
+            LOG.warn("Could not unload world: $GAME_WORLD_NAME")
         val gameWorldDir = File(GAME_WORLD_NAME)
         if (!gameWorldDir.deleteRecursively())
             LOG.warn("Could not delete world directory $gameWorldDir")
         File(map.name).copyRecursively(gameWorldDir)
-        return Bukkit.createWorld(WorldCreator.name(GAME_WORLD_NAME))
+        if (!File(gameWorldDir, "uid.dat").delete()) {
+            LOG.error("Could not delete uid.dat in $gameWorldDir!")
+            return null
+        }
+        return Bukkit.createWorld(WorldCreator.ofKey(GAME_WORLD_NAME.asId()))
     }
 }
