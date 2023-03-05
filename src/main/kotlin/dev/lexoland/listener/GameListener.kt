@@ -46,7 +46,7 @@ object GameListener : Listener {
     fun onDamage(e: EntityDamageByEntityEvent) {
         val damager = e.damager
         val entity = e.entity
-        if (!Game.state.takeAnyDamage && !Game.state.takeNonPlayerDamage && damager is Player)
+        if (!Game.state.takeAnyDamage && Game.state.takeNonPlayerDamage && damager is Player)
             e.isCancelled = true
         if(Game.state == GameState.IN_GAME) {
             if (damager is Player && entity is Player && e.finalDamage > entity.health)
