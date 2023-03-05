@@ -1,37 +1,58 @@
 package dev.lexoland.core
 
-import dev.lexoland.PLUGIN
+import dev.lexoland.asId
 import dev.lexoland.core.Game.randomSource
 import dev.lexoland.utils.FilterableWeightedList
+import dev.lexoland.utils.rgb
+import dev.lexoland.utils.text
+import java.util.Locale
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.TextColor
 import org.bukkit.Bukkit
-import org.bukkit.NamespacedKey
 import org.bukkit.World
 import org.bukkit.block.Container
 import org.bukkit.loot.Lootable
 
 class LootBoxHandler(world: World, map: Map) {
 
-    val lootBoxes = map.lootBoxes.map { it.toLocation(world) }
+    private val lootBoxes = map.lootBoxes.map { it.toLocation(world) }
 
     fun setup() {
         lootBoxes.map { it.block.state }.filterIsInstance<Container>().forEach {
             it.inventory.clear()
             if (it !is Lootable)
                 throw IllegalStateException("Container can't posses a loottable")
-            it.lootTable = Bukkit.getLootTable(weightedLoot.pickRandom(randomSource))
+            val chest = weightedLoot.pickRandom(randomSource)
+            it.lootTable = chest.toLootTable()
             it.seed = randomSource.nextLong()
+            it.customName(chest.customName().appendSpace().append(Component.translatable(it.block.type.translationKey())))
         }
     }
 
-    private val weightedLoot = FilterableWeightedList<NamespacedKey>()
-        .add("bad/chest_1".key(), 20)
-        .add("bad/chest_2".key(), 20)
+    private val weightedLoot = FilterableWeightedList<Chest>()
+        .add(Chest(Type.CRAP, "chest_1"), 20)
+        .add(Chest(Type.CRAP, "chest_2"), 20)
 
-        .add("normal/chest_1".key(), 10)
-        .add("normal/chest_2".key(), 10)
+        .add(Chest(Type.BASIC, "chest_1"), 10)
+        .add(Chest(Type.BASIC, "chest_2"), 10)
 
-        .add("good/chest_1".key(), 5)
-        .add("good/chest_2".key(), 5)
+        .add(Chest(Type.SIGMA, "chest_1"), 5)
+        .add(Chest(Type.SIGMA, "chest_2"), 5)
 
-    private fun String.key() = NamespacedKey(PLUGIN, "qsg/$this")
+    inner class Chest(
+        private val type: Type,
+        private val key: String
+    ) {
+        fun customName() = text(type.name.lowercase(Locale.getDefault()).replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }, type.color)
+        fun toLootTable() = Bukkit.getLootTable("${type.key}/$key".asId())
+    }
+
+    enum class Type(
+        val key: String,
+        val color: TextColor
+    ) {
+        CRAP("crap", rgb(0x824800)),
+        BASIC("basic", rgb(0x008ae6)),
+        SIGMA("sigma", rgb(0x00e01a))
+    }
 }
