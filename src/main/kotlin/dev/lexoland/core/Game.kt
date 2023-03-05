@@ -41,7 +41,7 @@ object Game {
     var state = GameState.LOBBY
     val players = mutableMapOf<UUID, QSGPlayer>()
 
-    val gameStartCountdown = GameStartCountdown().also { it.start() }
+    val gameStartCountdown = GameStartCountdown()
     lateinit var safeTimeCountdown: SafeTimeCountdown
     lateinit var worldBorderCountdown: WorldBorderCountdown
 
@@ -91,38 +91,37 @@ object Game {
             return
         }
         broadcast("Das Spiel startet jetzt!", color = NamedTextColor.GRAY)
-        for (qsgPlayer in players.values) {
-            qsgPlayer.player.hideBossBar(gameStartCountdown.bossBar)
-            spawnHandler.assignSpawn(qsgPlayer.player)
-        }
+        eachPlayers { spawnHandler.assignSpawn(it) }
         lootBoxHandler.setup()
         state = GameState.PREPARATION
 
-        SimpleCountdown(20, 10, { time ->
-            for (qsgPlayer in players.values) {
-                val player = qsgPlayer.player
-                val color = hsv(time / 10f * 0.33f, 1f, 1f)
-                if (time <= 3) {
-                    player.showTitle(Title.title(
-                        text(if (time == 0) "Los!" else time, color = color),
-                        Component.space(),
-                        times(0.seconds, 0.seconds, 1.seconds)
-                    ))
-                    player.playSound(qsgPlayer.player.location, Sound.BLOCK_NOTE_BLOCK_PLING, 100f, if (time == 0) 1f else 0f)
-                } else {
-                    player.showTitle(Title.title(
-                        Component.space(),
-                        text(time, color = color),
-                        times(0.seconds, 2.seconds, 0.seconds)
-                    ))
-                }
+        fun display(time: Int, large: Boolean) = eachPlayers {
+            val color = hsv(time / 10f * 0.33f, 1f, 1f)
+            if (large) {
+                it.showTitle(Title.title(
+                    text(if (time == 0) "Los!" else time, color = color),
+                    Component.space(),
+                    times(0.seconds, 0.seconds, 1.seconds)
+                ))
+                it.playSound(it.location, Sound.BLOCK_NOTE_BLOCK_PLING, 100f, if (time == 0) 1f else 0f)
+                return@eachPlayers
             }
+            it.showTitle(Title.title(
+                Component.space(),
+                text(time, color = color),
+                times(0.seconds, 2.seconds, 0.seconds)
+            ))
+        }
+
+        SimpleCountdown(20, 10, { time ->
+            display(time, time <= 3)
         }, {
+            display(0, true)
             state = GameState.SAFE_TIME
             spawnHandler.uncloseAll()
 
-            worldBorderCountdown = WorldBorderCountdown().also { it.start() }
-            safeTimeCountdown = SafeTimeCountdown().also { it.start() }
+            worldBorderCountdown = WorldBorderCountdown()
+            safeTimeCountdown = SafeTimeCountdown()
         }).start()
     }
 
@@ -165,13 +164,16 @@ object Game {
         }
         return Bukkit.createWorld(WorldCreator.ofKey(GAME_WORLD_NAME.asId()))
     }
+
+    inline fun eachPlayers(block: (Player) -> Unit) = players.values.forEach { block(it.player) }
 }
 
 
 class GameStartCountdown : BossBarCountdown(
     Game.players.values.map { it.player },
     1, 30 * 20,
-    Game::startGame
+    Game::startGame,
+    start = true
 ) {
     var waiting = true
 
@@ -224,7 +226,8 @@ class GameStartCountdown : BossBarCountdown(
 class SafeTimeCountdown : BossBarCountdown(
     Game.players.values.map { it.player },
     1, 30 * 20,
-    { Game.state = GameState.IN_GAME }
+    { Game.state = GameState.IN_GAME },
+    start = true
 ) {
     override fun tick() {
         bossBar.name(gradient("Sicherheitszeit endet in ", rgb(0xff0000), rgb(0xbb0000)) + text("${ceil(timeLeft / 20f).toInt()}s", rgb(0xff7777)))
