@@ -3,17 +3,22 @@ package dev.lexoland.core
 import dev.lexoland.PLUGIN
 import dev.lexoland.utils.gradient
 import dev.lexoland.utils.rgb
+import dev.lexoland.utils.text
 import java.util.concurrent.TimeUnit
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 
 class WorldBorderCountdown : Countdown(20, 60 * 5, ::onFinish) {
     override fun tick() {
         Game.players.values.forEach {
-            val text = when {
-                timeLeft > 20 * 60 -> "Die Weltborder verkleinert sich in ${timeLeft / 60}m ${timeLeft % 60}s"
-                else -> "Die Weltborder verkleinert sich in ${timeLeft}s"
+            val time = when {
+                timeLeft > 20 * 60 -> "${timeLeft / 60}m ${timeLeft % 60}s"
+                else -> "${timeLeft}s"
             }
-            it.player.sendActionBar(gradient(text, rgb(0x028bed), rgb(0x0052c4)))
+            it.player.sendActionBar(
+                gradient("Die Weltborder verkleinert sich in ", rgb(0x028bed), rgb(0x0052c4))
+                    .append(text(time, NamedTextColor.AQUA))
+            )
         }
     }
 }
@@ -28,7 +33,10 @@ private fun onFinish() {
 class SuddenDeathCountdown : Countdown(20, 30, ::onSuddenDeath) {
     override fun tick() {
         Game.players.values.forEach {
-            it.player.sendActionBar(gradient("SuddenDeath started in ${timeLeft}s", rgb(0xed3700), rgb(0xc40000)))
+            it.player.sendActionBar(
+                gradient("SuddenDeath started in ", rgb(0xed3700), rgb(0xc40000))
+                    .append(text("${timeLeft}s", NamedTextColor.RED))
+            )
         }
     }
 }
