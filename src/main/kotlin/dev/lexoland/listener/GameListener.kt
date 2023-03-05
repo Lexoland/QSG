@@ -16,7 +16,6 @@ import org.bukkit.event.entity.FoodLevelChangeEvent
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.persistence.PersistentDataType
-import org.bukkit.util.Vector
 
 object GameListener : Listener {
 
@@ -29,17 +28,13 @@ object GameListener : Listener {
             return
         val player = e.player
         val qsgPlayer = player.qsg ?: return
-        val killer = player.lastDamageCause?.entity
 
         e.isCancelled = true
         e.droppedExp += 5
         e.deathMessage(PREFIX + e.deathMessage()!!.color(NamedTextColor.RED))
         Game.spawnHandler.onDeath(player)
         player.persistentDataContainer[DEATH_KEY, PersistentDataType.INTEGER] = 1 + (player.persistentDataContainer[DEATH_KEY, PersistentDataType.INTEGER] ?: 0)
-
         qsgPlayer.setToSpectator()
-        player.velocity = killer?.location?.subtract(player.location)?.toVector()?.normalize()?.setY(0.25)
-            ?: Vector(0.0, 0.25, 0.0)
 
         if(!Game.spawnHandler.hasMoreThanOneSurvivor())
             Game.endGame()

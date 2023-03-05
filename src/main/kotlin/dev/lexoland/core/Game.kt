@@ -3,20 +3,7 @@ package dev.lexoland.core
 import dev.lexoland.LOG
 import dev.lexoland.PLUGIN
 import dev.lexoland.asId
-import dev.lexoland.utils.blockCentered
-import dev.lexoland.utils.broadcast
-import dev.lexoland.utils.gradient
-import dev.lexoland.utils.hsv
-import dev.lexoland.utils.plus
-import dev.lexoland.utils.rgb
-import dev.lexoland.utils.text
-import dev.lexoland.utils.times
-import java.io.File
-import java.util.Random
-import java.util.UUID
-import kotlin.math.ceil
-import kotlin.random.asKotlinRandom
-import kotlin.time.Duration.Companion.seconds
+import dev.lexoland.utils.*
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -26,6 +13,11 @@ import org.bukkit.Sound
 import org.bukkit.World
 import org.bukkit.WorldCreator
 import org.bukkit.entity.Player
+import java.io.File
+import java.util.*
+import kotlin.math.ceil
+import kotlin.random.asKotlinRandom
+import kotlin.time.Duration.Companion.seconds
 
 const val MIN_PLAYERS = 2
 
@@ -42,8 +34,9 @@ object Game {
     val players = mutableMapOf<UUID, QSGPlayer>()
 
     val gameStartCountdown = GameStartCountdown()
-    lateinit var safeTimeCountdown: SafeTimeCountdown
-    lateinit var worldBorderCountdown: WorldBorderCountdown
+    var safeTimeCountdown: SafeTimeCountdown? = null
+    var worldBorderCountdown: WorldBorderCountdown? = null
+    var suddenDeathCountdown: SuddenDeathCountdown? = null
 
     val initialized get() = this::map.isInitialized
 
@@ -127,7 +120,8 @@ object Game {
 
     fun endGame() {
         state = GameState.ENDING
-        worldBorderCountdown.stop()
+        worldBorderCountdown?.stop()
+        suddenDeathCountdown?.stop()
 
         var countdown = 5
         Bukkit.getScheduler().runTaskTimer(PLUGIN, { task ->

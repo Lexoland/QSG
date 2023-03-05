@@ -5,13 +5,13 @@ import dev.lexoland.core.Game.randomSource
 import dev.lexoland.utils.FilterableWeightedList
 import dev.lexoland.utils.rgb
 import dev.lexoland.utils.text
-import java.util.Locale
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 import org.bukkit.Bukkit
 import org.bukkit.World
 import org.bukkit.block.Container
 import org.bukkit.loot.Lootable
+import java.util.*
 
 class LootBoxHandler(world: World, map: Map) {
 
@@ -26,6 +26,7 @@ class LootBoxHandler(world: World, map: Map) {
             it.lootTable = chest.toLootTable()
             it.seed = randomSource.nextLong()
             it.customName(chest.customName().appendSpace().append(Component.translatable(it.block.type.translationKey())))
+            it.update(true)
         }
     }
 

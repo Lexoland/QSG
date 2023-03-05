@@ -75,7 +75,7 @@ class SpawnHandler(world: World, map: Map) {
         }
 
         fun decorate() {
-            armorStand = location.world.spawn(location.clone().subtract(0.0, 1.41, 0.0), ArmorStand::class.java) {
+            armorStand = location.world.spawn(location.clone().subtract(0.0, 1.435, 0.0), ArmorStand::class.java) {
                 it.isVisible = false
                 it.isInvulnerable = true
                 it.isMarker = true
