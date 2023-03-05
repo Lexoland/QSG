@@ -22,7 +22,7 @@ class QSGPlayer(
         player.level = 0
         player.foodLevel = 20
 
-        if (Game.started)
+        if (Game.state != GameState.LOBBY)
             player.teleportToGameSpawn()
         else player.teleportToLobby()
     }
