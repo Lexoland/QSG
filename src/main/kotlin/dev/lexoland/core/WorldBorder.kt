@@ -24,7 +24,8 @@ class WorldBorderCountdown : Countdown(20, 60 * 5, ::onFinish, start = true) {
 private fun onFinish() {
     Game.gameWorld.worldBorder.setSize(10.0, 30)
     Bukkit.getScheduler().runTaskLater(PLUGIN, Runnable {
-        Game.drawCountdown = DrawCountdown()
+        if (Game.state != GameState.ENDING)
+            Game.drawCountdown = DrawCountdown()
     }, 30 * 20)
 }
 
@@ -38,5 +39,5 @@ class DrawCountdown : Countdown(20, 30, ::onDraw, start = true) {
 }
 
 private fun onDraw() {
-    Game.endGame()
+    Game.endGame(null)
 }

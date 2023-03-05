@@ -128,14 +128,13 @@ object Game {
         }, start = true)
     }
 
-    fun endGame() {
+    fun endGame(winner: Player? = players.values.firstOrNull { !it.spectating }?.player) {
         state = GameState.ENDING
         preparationCountdown?.stop()
         safeTimeCountdown?.stop()
         worldBorderCountdown?.stop()
         drawCountdown?.stop()
 
-        val winner = players.values.firstOrNull { !it.spectating }?.player
         val winnerName = winner?.name ?: "Niemand"
 
         eachPlayers {

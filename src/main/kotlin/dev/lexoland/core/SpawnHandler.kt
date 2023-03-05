@@ -92,6 +92,7 @@ class SpawnHandler(world: World, map: Map) {
             player.level = 0
             player.exp = 0f
             player.foodLevel = 20
+            player.health = 20.0
             enclosePlayer()
             decorate()
         }
