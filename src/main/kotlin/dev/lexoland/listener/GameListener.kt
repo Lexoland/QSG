@@ -27,6 +27,7 @@ object GameListener : Listener {
         if(Game.state != GameState.IN_GAME)
             return
         Game.spawnHandler.onDeath(e.entity)
+        e.droppedExp += 5
         e.player.gameMode = GameMode.SPECTATOR
         e.deathMessage(PREFIX + e.deathMessage()!!.color(NamedTextColor.RED))
         e.entity.persistentDataContainer[DEATH_KEY, PersistentDataType.INTEGER] = 1 + (e.entity.persistentDataContainer[DEATH_KEY, PersistentDataType.INTEGER] ?: 0)
