@@ -69,7 +69,6 @@ class SpawnHandler(world: World, map: Map) {
         }
 
         fun unclosePlayer() {
-            val p = player!!
             closure.forEach {
                 it.block.type = Material.AIR
             }
