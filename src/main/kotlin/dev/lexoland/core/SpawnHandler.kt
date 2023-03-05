@@ -1,6 +1,7 @@
 package dev.lexoland.core
 
 import dev.lexoland.utils.blockCentered
+import kotlin.math.atan2
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.World
@@ -9,7 +10,6 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.util.Vector
-import kotlin.math.atan2
 
 class SpawnHandler(world: World, map: Map) {
 
@@ -24,8 +24,6 @@ class SpawnHandler(world: World, map: Map) {
     fun uncloseAll() {
         spawns.forEach { it.unclosePlayer() }
     }
-
-    fun hasFreeSpawns() = spawns.any { it.isFree() }
 
     fun hasMoreThanOneSurvivor() = spawns.count { !it.isFree() } > 1
 
@@ -90,6 +88,11 @@ class SpawnHandler(world: World, map: Map) {
 
         fun teleportAndEnclose(player: Player) {
             this.player = player
+            player.inventory.clear()
+            player.activePotionEffects.forEach { player.removePotionEffect(it.type) }
+            player.level = 0
+            player.exp = 0f
+            player.foodLevel = 20
             enclosePlayer()
             decorate()
         }

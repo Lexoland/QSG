@@ -37,7 +37,7 @@ object GameListener : Listener {
         qsgPlayer.setToSpectator()
 
         if(!Game.spawnHandler.hasMoreThanOneSurvivor())
-            Game.endGame()
+            Game.endGame(e.player.killer)
     }
 
     @EventHandler

@@ -5,13 +5,13 @@ import dev.lexoland.core.Game.randomSource
 import dev.lexoland.utils.FilterableWeightedList
 import dev.lexoland.utils.rgb
 import dev.lexoland.utils.text
+import java.util.Locale
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 import org.bukkit.Bukkit
 import org.bukkit.World
 import org.bukkit.block.Container
 import org.bukkit.loot.Lootable
-import java.util.*
 
 class LootBoxHandler(world: World, map: Map) {
 
@@ -54,6 +54,6 @@ class LootBoxHandler(world: World, map: Map) {
     ) {
         CRAP("crap", rgb(0x824800)),
         BASIC("basic", rgb(0x008ae6)),
-        SIGMA("sigma", rgb(0x00e01a))
+        SIGMA("sigma", rgb(0x009e28))
     }
 }

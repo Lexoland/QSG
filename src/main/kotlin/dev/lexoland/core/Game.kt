@@ -3,7 +3,21 @@ package dev.lexoland.core
 import dev.lexoland.LOG
 import dev.lexoland.PLUGIN
 import dev.lexoland.asId
-import dev.lexoland.utils.*
+import dev.lexoland.utils.blockCentered
+import dev.lexoland.utils.broadcast
+import dev.lexoland.utils.gradient
+import dev.lexoland.utils.hsv
+import dev.lexoland.utils.plus
+import dev.lexoland.utils.rgb
+import dev.lexoland.utils.text
+import dev.lexoland.utils.times
+import java.io.File
+import java.util.Random
+import java.util.UUID
+import kotlin.math.ceil
+import kotlin.random.asKotlinRandom
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -13,11 +27,6 @@ import org.bukkit.Sound
 import org.bukkit.World
 import org.bukkit.WorldCreator
 import org.bukkit.entity.Player
-import java.io.File
-import java.util.*
-import kotlin.math.ceil
-import kotlin.random.asKotlinRandom
-import kotlin.time.Duration.Companion.seconds
 
 const val MIN_PLAYERS = 2
 
@@ -36,7 +45,7 @@ object Game {
     val gameStartCountdown = GameStartCountdown()
     var safeTimeCountdown: SafeTimeCountdown? = null
     var worldBorderCountdown: WorldBorderCountdown? = null
-    var suddenDeathCountdown: SuddenDeathCountdown? = null
+    var drawCountdown: DrawCountdown? = null
 
     val initialized get() = this::map.isInitialized
 
@@ -118,10 +127,20 @@ object Game {
         }).start()
     }
 
-    fun endGame() {
+    fun endGame(winner: Player?) {
         state = GameState.ENDING
         worldBorderCountdown?.stop()
-        suddenDeathCountdown?.stop()
+        drawCountdown?.stop()
+
+        val winnerName = winner?.name ?: "Niemand"
+
+        eachPlayers {
+            it.showTitle(Title.title(
+                gradient("Das Spiel ist vorbei!", rgb(0xffc800), rgb(0xffa600)),
+                gradient("Der Gewinner ist ", rgb(0xff8400), rgb(0xff7300)) + gradient(winnerName, rgb(0x00c8ff), rgb(0x009954)),
+                times(500.milliseconds, 4.seconds, 500.milliseconds)
+            ))
+        }
 
         var countdown = 5
         Bukkit.getScheduler().runTaskTimer(PLUGIN, { task ->
@@ -139,6 +158,8 @@ object Game {
     }
 
     private fun restart() {
+        state = GameState.LOBBY
+        eachPlayers { it.teleportToLobby() }
         setup()
         Bukkit.getOnlinePlayers().forEach { addPlayer(it) }
     }

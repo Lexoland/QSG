@@ -27,7 +27,7 @@ object JoinListener : Listener {
             Game.removePlayer(e.player)
             if (Game.state != GameState.LOBBY && Game.state != GameState.ENDING)
                 if (!Game.spawnHandler.hasMoreThanOneSurvivor())
-                    Game.endGame()
+                    Game.endGame(null)
         }
     }
 }

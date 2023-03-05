@@ -2,23 +2,21 @@ package dev.lexoland.core
 
 import dev.lexoland.PLUGIN
 import dev.lexoland.utils.gradient
+import dev.lexoland.utils.plus
 import dev.lexoland.utils.rgb
 import dev.lexoland.utils.text
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
-import java.util.concurrent.TimeUnit
 
 class WorldBorderCountdown : Countdown(20, 60 * 5, ::onFinish, start = true) {
     override fun tick() {
-        Game.players.values.forEach {
+        Game.eachPlayers {
             val time = when {
                 timeLeft > 60 -> "${timeLeft / 60}m ${timeLeft % 60}s"
                 else -> "${timeLeft}s"
             }
-            it.player.sendActionBar(
-                gradient("Die Weltborder verkleinert sich in ", rgb(0x2aa0f5), rgb(0x028bed))
-                    .append(text(time, NamedTextColor.AQUA))
-            )
+            it.sendActionBar(
+                gradient("Die Weltborder verkleinert sich in ", rgb(0x2aa0f5), rgb(0x028bed)) + text(time, NamedTextColor.AQUA))
         }
     }
 }
@@ -26,21 +24,19 @@ class WorldBorderCountdown : Countdown(20, 60 * 5, ::onFinish, start = true) {
 private fun onFinish() {
     Game.gameWorld.worldBorder.setSize(10.0, 30)
     Bukkit.getScheduler().runTaskLater(PLUGIN, Runnable {
-        Game.suddenDeathCountdown = SuddenDeathCountdown()
+        Game.drawCountdown = DrawCountdown()
     }, 30 * 20)
 }
 
-class SuddenDeathCountdown : Countdown(20, 30, ::onSuddenDeath, start = true) {
+class DrawCountdown : Countdown(20, 30, ::onDraw, start = true) {
     override fun tick() {
-        Game.players.values.forEach {
-            it.player.sendActionBar(
-                gradient("SuddenDeath startet in ", rgb(0xed3700), rgb(0xc40000))
-                    .append(text("${timeLeft}s", NamedTextColor.RED))
-            )
+        Game.eachPlayers {
+            it.sendActionBar(
+                gradient("Das Spiel endet in einem Unentschieden in ", rgb(0xed3700), rgb(0xc40000)) + text("${timeLeft}s", NamedTextColor.RED))
         }
     }
 }
 
-private fun onSuddenDeath() {
-    Game.gameWorld.worldBorder.setSize(0.0, TimeUnit.MILLISECONDS, 7500)
+private fun onDraw() {
+    Game.endGame(null)
 }
