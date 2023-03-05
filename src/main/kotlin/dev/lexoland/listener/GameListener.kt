@@ -3,10 +3,10 @@ package dev.lexoland.listener
 import dev.lexoland.asId
 import dev.lexoland.core.Game
 import dev.lexoland.core.GameState
+import dev.lexoland.core.qsg
 import dev.lexoland.utils.PREFIX
 import dev.lexoland.utils.plus
 import net.kyori.adventure.text.format.NamedTextColor
-import org.bukkit.GameMode
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -16,6 +16,7 @@ import org.bukkit.event.entity.FoodLevelChangeEvent
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.persistence.PersistentDataType
+import org.bukkit.util.Vector
 
 object GameListener : Listener {
 
@@ -26,11 +27,19 @@ object GameListener : Listener {
     fun onDeath(e: PlayerDeathEvent) {
         if(Game.state != GameState.IN_GAME)
             return
-        Game.spawnHandler.onDeath(e.entity)
+        val player = e.player
+        val qsgPlayer = player.qsg ?: return
+        val killer = player.lastDamageCause?.entity
+
+        e.isCancelled = true
         e.droppedExp += 5
-        e.player.gameMode = GameMode.SPECTATOR
         e.deathMessage(PREFIX + e.deathMessage()!!.color(NamedTextColor.RED))
-        e.entity.persistentDataContainer[DEATH_KEY, PersistentDataType.INTEGER] = 1 + (e.entity.persistentDataContainer[DEATH_KEY, PersistentDataType.INTEGER] ?: 0)
+        Game.spawnHandler.onDeath(player)
+        player.persistentDataContainer[DEATH_KEY, PersistentDataType.INTEGER] = 1 + (player.persistentDataContainer[DEATH_KEY, PersistentDataType.INTEGER] ?: 0)
+
+        qsgPlayer.setToSpectator()
+        player.velocity = killer?.location?.subtract(player.location)?.toVector()?.normalize()?.setY(0.25)
+            ?: Vector(0.0, 0.25, 0.0)
 
         if(!Game.spawnHandler.hasMoreThanOneSurvivor())
             Game.endGame()
