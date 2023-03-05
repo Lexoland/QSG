@@ -22,6 +22,6 @@ fun WorldCreator.presetVoid() = apply {
 }
 
 fun Player.dropInventory() {
-    inventory.forEach { world.dropItem(location, it) }
+    inventory.forEach { if(it != null) world.dropItem(location, it) }
     inventory.clear()
 }
