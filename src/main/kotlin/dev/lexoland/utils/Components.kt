@@ -6,9 +6,13 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
+import net.kyori.adventure.title.Title
+import net.kyori.adventure.util.HSVLike
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.command.CommandSender
+import kotlin.time.Duration
+import kotlin.time.toJavaDuration
 
 val PREFIX = text("[", rgb(0x43a180)) +
         text("QSG", rgb(0x00ffa6), TextDecoration.BOLD) +
@@ -84,3 +88,6 @@ operator fun Component.plus(other: String) = append(text(other))
 
 fun rgb(r: Int, g: Int, b: Int) = TextColor.color(r, g, b)
 fun rgb(color: Int) = TextColor.color(color)
+fun hsv(h: Float, s: Float, v: Float) = TextColor.color(HSVLike.hsvLike(h, s, v))
+
+fun times(fadeIn: Duration, stay: Duration, fadeOut: Duration) = Title.Times.times(fadeIn.toJavaDuration(), stay.toJavaDuration(), fadeOut.toJavaDuration())

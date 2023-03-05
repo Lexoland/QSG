@@ -2,6 +2,7 @@ package dev.lexoland.listener
 
 import dev.lexoland.asId
 import dev.lexoland.core.Game
+import dev.lexoland.core.GameState
 import dev.lexoland.utils.PREFIX
 import dev.lexoland.utils.plus
 import net.kyori.adventure.text.format.NamedTextColor
@@ -23,7 +24,7 @@ object GameListener : Listener {
 
     @EventHandler
     fun onDeath(e: PlayerDeathEvent) {
-        if(!Game.inGame)
+        if(Game.state != GameState.IN_GAME)
             return
         Game.spawnHandler.onDeath(e.entity)
         e.player.gameMode = GameMode.SPECTATOR
@@ -35,32 +36,33 @@ object GameListener : Listener {
     }
 
     @EventHandler
-    fun cancelDamage(e: EntityDamageEvent) {
-        if(!Game.inGame)
+    fun onDamage(e: EntityDamageEvent) {
+        if(!Game.state.takeAnyDamage && !Game.state.takeNonPlayerDamage)
             e.isCancelled = true
     }
 
     @EventHandler
-    fun cancelDamage(e: EntityDamageByEntityEvent) {
-        if(!Game.preparation)
-            return
+    fun onDamage(e: EntityDamageByEntityEvent) {
         val damager = e.damager
         val entity = e.entity
-        if(damager is Player && entity is Player)
-            if(e.finalDamage > entity.health)
+        if (!Game.state.takeAnyDamage && !Game.state.takeNonPlayerDamage && damager is Player)
+            e.isCancelled = true
+        if(Game.state == GameState.IN_GAME) {
+            if (damager is Player && entity is Player && e.finalDamage > entity.health)
                 e.damager.persistentDataContainer[KILL_KEY, PersistentDataType.INTEGER] = 1 + (e.damager.persistentDataContainer[KILL_KEY, PersistentDataType.INTEGER] ?: 0)
+        }
     }
 
     @EventHandler
     fun cancelFood(e: FoodLevelChangeEvent) {
-        if(!Game.inGame)
+        if(Game.state.hunger)
             return
         e.isCancelled = true
     }
 
     @EventHandler
     fun cancelChestOpen(e: InventoryOpenEvent) {
-        if(e.inventory.holder != e.player && !Game.started)
+        if(e.inventory.holder != e.player && !(Game.state.openContainers))
             e.isCancelled = true
     }
 }

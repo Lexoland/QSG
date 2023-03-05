@@ -1,7 +1,10 @@
 package dev.lexoland.core
 
 import dev.lexoland.PLUGIN
+import dev.lexoland.utils.text
+import net.kyori.adventure.bossbar.BossBar
 import org.bukkit.Bukkit
+import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitTask
 
 abstract class Countdown(
@@ -12,13 +15,11 @@ abstract class Countdown(
     var timeLeft = initialTime
         set(value) {
             field = value
-            startTask()
+            start()
         }
     lateinit var task: BukkitTask
 
-    init { startTask() }
-
-    private fun startTask() {
+    fun start() {
         if (this::task.isInitialized && !task.isCancelled)
             return
         task = Bukkit.getScheduler().runTaskTimer(PLUGIN, Runnable {
@@ -52,5 +53,26 @@ class SimpleCountdown(
 ) : Countdown(rate, initialTime, onFinished) {
     override fun tick() {
         onTick(timeLeft)
+    }
+}
+
+abstract class BossBarCountdown(
+    players: List<Player>,
+    rate: Int = 20,
+    initialTime: Int,
+    onFinish: () -> Unit
+) : Countdown(rate, initialTime, onFinish) {
+    val bossBar = BossBar.bossBar(text("-"), 1f, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS)
+
+    init {
+        players.forEach { it.showBossBar(bossBar) }
+    }
+
+    fun addPlayer(player: Player) {
+        player.showBossBar(bossBar)
+    }
+
+    fun removePlayer(player: Player) {
+        player.hideBossBar(bossBar)
     }
 }

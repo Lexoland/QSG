@@ -8,8 +8,6 @@ import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
-import org.bukkit.potion.PotionEffect
-import org.bukkit.potion.PotionEffectType
 import org.bukkit.util.Vector
 import kotlin.math.atan2
 
@@ -21,6 +19,10 @@ class SpawnHandler(world: World, map: Map) {
     fun assignSpawn(player: Player) {
         val spawn = spawns.filter { it.isFree() }.random()
         spawn.teleportAndEnclose(player)
+    }
+
+    fun uncloseAll() {
+        spawns.forEach { it.unclosePlayer() }
     }
 
     fun hasFreeSpawns() = spawns.any { it.isFree() }
@@ -35,8 +37,8 @@ class SpawnHandler(world: World, map: Map) {
     inner class Spawn(world: World, pos: Vector) {
 
         val location: Location = pos.toLocation(world).blockCentered().apply {
-            val angle = atan2((x - center.x), (z - center.z))
-            yaw = Math.toDegrees(angle).toFloat()
+            val angle = atan2((z - center.z), (x - center.x))
+            yaw = Math.toDegrees(angle).toFloat() + 90f
         }
         val closure = listOf(
             location.clone().add(0.0, 2.0, 0.0),
@@ -61,7 +63,6 @@ class SpawnHandler(world: World, map: Map) {
         fun enclosePlayer() {
             val p = player!!
             p.teleport(location)
-            p.addPotionEffect(PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, 255))
             closure.forEach {
                 it.block.type = Material.BARRIER
             }
@@ -69,14 +70,13 @@ class SpawnHandler(world: World, map: Map) {
 
         fun unclosePlayer() {
             val p = player!!
-            p.removePotionEffect(PotionEffectType.JUMP)
             closure.forEach {
                 it.block.type = Material.AIR
             }
         }
 
         fun decorate() {
-            armorStand = location.world.spawn(location.clone().subtract(0.0, 1.6, 0.0), ArmorStand::class.java) {
+            armorStand = location.world.spawn(location.clone().subtract(0.0, 1.41, 0.0), ArmorStand::class.java) {
                 it.isVisible = false
                 it.isInvulnerable = true
                 it.isMarker = true

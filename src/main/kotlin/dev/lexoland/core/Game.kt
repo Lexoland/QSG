@@ -5,7 +5,9 @@ import dev.lexoland.PLUGIN
 import dev.lexoland.asId
 import dev.lexoland.utils.*
 import net.kyori.adventure.bossbar.BossBar
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.title.Title
 import org.bukkit.Bukkit
 import org.bukkit.Sound
 import org.bukkit.World
@@ -15,6 +17,7 @@ import java.io.File
 import java.util.*
 import kotlin.math.ceil
 import kotlin.random.asKotlinRandom
+import kotlin.time.Duration.Companion.seconds
 
 const val MIN_PLAYERS = 2
 
@@ -26,11 +29,10 @@ object Game {
     lateinit var map: Map
     lateinit var lootBoxHandler: LootBoxHandler
     lateinit var spawnHandler: SpawnHandler
-    var started = false
-    var inGame = false
-    var preparation = true
-    var preparationTime = 15
+    var state = GameState.LOBBY
     val players = mutableMapOf<UUID, QSGPlayer>()
+    val gameStartCountdown = GameStartCountdown().also { it.start() }
+    var safeTimeCountdown: SafeTimeCountdown? = null
 
     val initialized get() = this::map.isInitialized
 
@@ -55,84 +57,64 @@ object Game {
     fun addPlayer(player: Player) {
         val qsgPlayer = QSGPlayer(player)
         players[player.uniqueId] = qsgPlayer
-        if (started) {
+        if (state != GameState.LOBBY) {
+            safeTimeCountdown?.let { player.showBossBar(it.bossBar) }
             qsgPlayer.setToSpectator()
             return
         }
         qsgPlayer.setToPlayer()
-        GameStartCountdown.update()
-        player.showBossBar(GameStartCountdown.bossBar)
-//        spawnHandler.prepareSpawnFor(player)
-//
-//        if(!spawnHandler.hasFreeSpawns())
-//            startGame()
+        gameStartCountdown.update()
+        gameStartCountdown.addPlayer(player)
     }
 
     fun removePlayer(player: Player) {
-        player.hideBossBar(GameStartCountdown.bossBar)
         players.remove(player.uniqueId)
-        GameStartCountdown.update()
+        gameStartCountdown.removePlayer(player)
+        gameStartCountdown.update()
     }
 
     fun startGame() {
         if (players.size < MIN_PLAYERS) { // just in case
-            GameStartCountdown.reset()
-            GameStartCountdown.update()
+            gameStartCountdown.reset()
+            gameStartCountdown.update()
             return
         }
-        for (qsgPlayer in players.values)
-            qsgPlayer.player.hideBossBar(GameStartCountdown.bossBar)
         broadcast("Das Spiel startet jetzt!", color = NamedTextColor.GRAY)
-//        started = true
-//        inGame = true
-//        preparation = true
-//        preparationTime = 15
-//        lootBoxHandler.setup()
-//
-//        var countdown = 10
-//        Bukkit.getScheduler().runTaskTimer(PLUGIN, { task ->
-//            if (countdown == 0) {
-//                task.cancel()
-//                spawnHandler.spawns.forEach {
-//                    it.player!!.inventory.clear()
-//                    it.player!!.gameMode = GameMode.SURVIVAL
-//                    it.unclose()
-//                }
-//                startPreparationTime()
-//                return@runTaskTimer
-//            }
-//            spawnHandler.spawns.forEach {
-//                val p = it.player ?: return@forEach
-//                p.sendTitlePart(TitlePart.TITLE, text("Spiel startet in", NamedTextColor.WHITE))
-//                p.sendTitlePart(
-//                    TitlePart.SUBTITLE,
-//                    text("$countdown", NamedTextColor.WHITE)
-//                        .append(text("s", NamedTextColor.GRAY))
-//                )
-//                p.sendTitlePart(TitlePart.TIMES, Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ofSeconds(1)))
-//            }
-//            countdown--
-//        }, 0, 1)
-    }
+        for (qsgPlayer in players.values) {
+            qsgPlayer.player.hideBossBar(gameStartCountdown.bossBar)
+            spawnHandler.assignSpawn(qsgPlayer.player)
+        }
+        lootBoxHandler.setup()
+        state = GameState.PREPARATION
 
-    private fun startPreparationTime() {
-        Bukkit.getScheduler().runTaskTimer(PLUGIN, { task ->
-            if (preparationTime == 0) {
-                preparation = false
-                task.cancel()
-                return@runTaskTimer
+        SimpleCountdown(20, 10, { time ->
+            for (qsgPlayer in players.values) {
+                val player = qsgPlayer.player
+                val color = hsv(time / 10f * 0.33f, 1f, 1f)
+                if (time <= 3) {
+                    player.showTitle(Title.title(
+                        text(if (time == 0) "Los!" else time, color = color),
+                        Component.space(),
+                        times(0.seconds, 0.seconds, 1.seconds)
+                    ))
+                    player.playSound(qsgPlayer.player.location, Sound.BLOCK_NOTE_BLOCK_PLING, 100f, if (time == 0) 1f else 0f)
+                } else {
+                    player.showTitle(Title.title(
+                        Component.space(),
+                        text(time, color = color),
+                        times(0.seconds, 2.seconds, 0.seconds)
+                    ))
+                }
             }
-            spawnHandler.spawns.forEach {
-                val p = it.player ?: return@forEach
-                p.sendActionBar(text("Vorbereitungszeit: ${preparationTime}s", NamedTextColor.WHITE))
-            }
-            preparationTime--
-        }, 0, 1)
+        }, {
+            state = GameState.SAFE_TIME
+            spawnHandler.uncloseAll()
+            safeTimeCountdown = SafeTimeCountdown().also { it.start() }
+        }).start()
     }
 
     fun endGame() {
-        inGame = false
-        preparation = true
+        state = GameState.ENDING
 
         var countdown = 5
         Bukkit.getScheduler().runTaskTimer(PLUGIN, { task ->
@@ -172,8 +154,11 @@ object Game {
 }
 
 
-object GameStartCountdown : Countdown(1, 30 * 20, Game::startGame) {
-    val bossBar = BossBar.bossBar(text("-"), 1f, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS)
+class GameStartCountdown : BossBarCountdown(
+    Game.players.values.map { it.player },
+    1, 30 * 20,
+    Game::startGame
+) {
     var waiting = true
 
     fun update() {
@@ -206,8 +191,8 @@ object GameStartCountdown : Countdown(1, 30 * 20, Game::startGame) {
         bossBar.color(BossBar.Color.GREEN)
         bossBar.overlay(BossBar.Overlay.PROGRESS)
         when(timeLeft) {
-            30 * 20 -> broadcastRemainingTime(30)
-            15 * 20 -> broadcastRemainingTime(10)
+            30 * 20 - 1 -> broadcastRemainingTime(30)
+            15 * 20 -> broadcastRemainingTime(15)
             5 * 20 -> broadcastRemainingTime(5)
             4 * 20 -> broadcastRemainingTime(4)
             3 * 20 -> broadcastRemainingTime(3)
@@ -220,7 +205,32 @@ object GameStartCountdown : Countdown(1, 30 * 20, Game::startGame) {
         broadcast("Das Spiel startet in {}", text("${time}s", NamedTextColor.AQUA), color = NamedTextColor.GRAY)
         Bukkit.getOnlinePlayers().forEach { it.playSound(it.location, Sound.UI_BUTTON_CLICK, 1000f, 2f) }
     }
+}
 
+class SafeTimeCountdown : BossBarCountdown(
+    Game.players.values.map { it.player },
+    1, 30 * 20,
+    { Game.state = GameState.IN_GAME }
+) {
+    override fun tick() {
+        bossBar.name(gradient("Sicherheitszeit endet in ", rgb(0xff0000), rgb(0xbb0000)) + text("${ceil(timeLeft / 20f).toInt()}s", rgb(0xff7777)))
+        bossBar.progress(timeLeft.toFloat() / initialTime)
+        bossBar.color(BossBar.Color.RED)
+        bossBar.overlay(BossBar.Overlay.PROGRESS)
+    }
+}
+
+enum class GameState(
+    val openContainers: Boolean = false,
+    val takeNonPlayerDamage: Boolean = false,
+    val takeAnyDamage: Boolean = false,
+    val hunger: Boolean = false
+) {
+    LOBBY,
+    PREPARATION,
+    SAFE_TIME(openContainers = true, takeNonPlayerDamage = true),
+    IN_GAME(openContainers = true, takeAnyDamage = true, hunger = true),
+    ENDING
 }
 
 fun Player.teleportToLobby() {

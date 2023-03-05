@@ -16,6 +16,7 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Bukkit
 import org.bukkit.WorldCreator
 import org.bukkit.entity.Player
+import java.util.*
 
 val EXCEPTION_NOT_ON_MAP = SimpleCommandExceptionType { "You are not on a map" }
 val EXCEPTION_INVALID_MAP = SimpleCommandExceptionType { "Invalid map" }
@@ -27,7 +28,7 @@ val mapCommand = brigadierCommand("map") {
         argument("name", StringArgumentType.word()) {
             argument("displayName", Arguments.Component.component()) {
                 executes<Player> { sender, context ->
-                    val name = StringArgumentType.getString(context, "name")
+                    val name = StringArgumentType.getString(context, "name").lowercase(Locale.ROOT)
                     val displayName = Arguments.Component.getComponent(context, "displayName")
                     Bukkit.getScheduler().runTask(PLUGIN) { _ ->
                         sender.respond("Generating world...")
