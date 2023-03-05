@@ -37,6 +37,11 @@ abstract class Countdown(
 
     open fun canCountDown() = true
 
+    fun stop() {
+        task.cancel()
+        reset()
+    }
+
     abstract fun tick()
 
     fun reset() {

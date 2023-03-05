@@ -3,7 +3,20 @@ package dev.lexoland.core
 import dev.lexoland.LOG
 import dev.lexoland.PLUGIN
 import dev.lexoland.asId
-import dev.lexoland.utils.*
+import dev.lexoland.utils.blockCentered
+import dev.lexoland.utils.broadcast
+import dev.lexoland.utils.gradient
+import dev.lexoland.utils.hsv
+import dev.lexoland.utils.plus
+import dev.lexoland.utils.rgb
+import dev.lexoland.utils.text
+import dev.lexoland.utils.times
+import java.io.File
+import java.util.Random
+import java.util.UUID
+import kotlin.math.ceil
+import kotlin.random.asKotlinRandom
+import kotlin.time.Duration.Companion.seconds
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -13,11 +26,6 @@ import org.bukkit.Sound
 import org.bukkit.World
 import org.bukkit.WorldCreator
 import org.bukkit.entity.Player
-import java.io.File
-import java.util.*
-import kotlin.math.ceil
-import kotlin.random.asKotlinRandom
-import kotlin.time.Duration.Companion.seconds
 
 const val MIN_PLAYERS = 2
 
@@ -29,10 +37,13 @@ object Game {
     lateinit var map: Map
     lateinit var lootBoxHandler: LootBoxHandler
     lateinit var spawnHandler: SpawnHandler
+
     var state = GameState.LOBBY
     val players = mutableMapOf<UUID, QSGPlayer>()
+
     val gameStartCountdown = GameStartCountdown().also { it.start() }
-    var safeTimeCountdown: SafeTimeCountdown? = null
+    lateinit var safeTimeCountdown: SafeTimeCountdown
+    lateinit var worldBorderCountdown: WorldBorderCountdown
 
     val initialized get() = this::map.isInitialized
 
@@ -109,12 +120,15 @@ object Game {
         }, {
             state = GameState.SAFE_TIME
             spawnHandler.uncloseAll()
+
+            worldBorderCountdown = WorldBorderCountdown().also { it.start() }
             safeTimeCountdown = SafeTimeCountdown().also { it.start() }
         }).start()
     }
 
     fun endGame() {
         state = GameState.ENDING
+        worldBorderCountdown.stop()
 
         var countdown = 5
         Bukkit.getScheduler().runTaskTimer(PLUGIN, { task ->
@@ -224,12 +238,13 @@ enum class GameState(
     val openContainers: Boolean = false,
     val takeNonPlayerDamage: Boolean = false,
     val takeAnyDamage: Boolean = false,
+    val canBuild: Boolean = false,
     val hunger: Boolean = false
 ) {
     LOBBY,
     PREPARATION,
-    SAFE_TIME(openContainers = true, takeNonPlayerDamage = true),
-    IN_GAME(openContainers = true, takeAnyDamage = true, hunger = true),
+    SAFE_TIME(openContainers = true, takeNonPlayerDamage = true, canBuild = true, hunger = true),
+    IN_GAME(openContainers = true, takeAnyDamage = true, canBuild = true, hunger = true),
     ENDING
 }
 

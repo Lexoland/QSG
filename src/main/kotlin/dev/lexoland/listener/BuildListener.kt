@@ -2,6 +2,7 @@ package dev.lexoland.listener
 
 import com.destroystokyo.paper.event.block.TNTPrimeEvent
 import dev.lexoland.asId
+import dev.lexoland.core.Game
 import dev.lexoland.core.map
 import dev.lexoland.utils.blockPosEqual
 import dev.lexoland.utils.respond
@@ -26,7 +27,7 @@ object BuildListener : Listener {
     @EventHandler
     fun cancelBuild(e: BlockPlaceEvent) {
         if (!allowed.contains(e.player)) {
-            if(placeableTag?.isTagged(e.block.type) == true)
+            if(Game.state.canBuild && placeableTag?.isTagged(e.block.type) == true)
                 return
             e.isCancelled = true
             if (e.block.type == Material.TNT) {
@@ -47,7 +48,7 @@ object BuildListener : Listener {
     @EventHandler
     fun cancelBuild(e: BlockBreakEvent) {
         if (!allowed.contains(e.player)) {
-            if(placeableTag?.isTagged(e.block.type) == true)
+            if(Game.state.canBuild && placeableTag?.isTagged(e.block.type) == true)
                 return
             e.isCancelled = true
         } else if (e.block.state is Container) {

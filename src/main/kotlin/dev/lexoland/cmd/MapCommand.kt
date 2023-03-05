@@ -8,15 +8,28 @@ import de.leximon.api.command.Arguments
 import de.leximon.api.command.Suggestions
 import dev.lexoland.PLUGIN
 import dev.lexoland.asId
-import dev.lexoland.core.*
 import dev.lexoland.core.Map
-import dev.lexoland.utils.*
+import dev.lexoland.core.map
+import dev.lexoland.core.maps
+import dev.lexoland.core.registerMap
+import dev.lexoland.core.saveMaps
+import dev.lexoland.utils.argument
+import dev.lexoland.utils.blockCentered
+import dev.lexoland.utils.blockPosEqual
+import dev.lexoland.utils.brigadierCommand
+import dev.lexoland.utils.executes
+import dev.lexoland.utils.literal
+import dev.lexoland.utils.presetVoid
+import dev.lexoland.utils.respond
+import dev.lexoland.utils.text
+import dev.lexoland.utils.textLocation
+import dev.lexoland.utils.toBlockVector
+import java.util.Locale
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Bukkit
 import org.bukkit.WorldCreator
 import org.bukkit.entity.Player
-import java.util.*
 
 val EXCEPTION_NOT_ON_MAP = SimpleCommandExceptionType { "You are not on a map" }
 val EXCEPTION_INVALID_MAP = SimpleCommandExceptionType { "Invalid map" }
@@ -66,6 +79,7 @@ val mapCommand = brigadierCommand("map") {
         executes<Player> { sender, _ ->
             val map = sender.world.map ?: throw EXCEPTION_NOT_ON_MAP.create()
             map.center = sender.location.toBlockVector()
+            sender.world.worldBorder.center = sender.location
             sender.respond("Center set to {}.", textLocation(sender.location))
             return@executes 1
         }
