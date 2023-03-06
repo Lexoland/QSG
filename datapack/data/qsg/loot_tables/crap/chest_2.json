@@ -1,0 +1,270 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:suspicious_stew",
+          "functions": [
+            {
+              "function": "minecraft:set_stew_effect",
+              "effects": [
+                {
+                  "type": "minecraft:absorption",
+                  "duration": {
+                    "type": "minecraft:binomial",
+                    "n": 200,
+                    "p": 0.7
+                  }
+                },
+                {
+                  "type": "minecraft:blindness",
+                  "duration": {
+                    "min": 60,
+                    "max": 120
+                  }
+                },
+                {
+                  "type": "minecraft:haste",
+                  "duration": {
+                    "min": 80,
+                    "max": 140
+                  }
+                },
+                {
+                  "type": "minecraft:darkness",
+                  "duration": {
+                    "min": 70,
+                    "max": 132
+                  }
+                },
+                {
+                  "type": "minecraft:glowing",
+                  "duration": 70
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:beef",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:binomial",
+                "n": 1,
+                "p": {
+                  "min": 0.25,
+                  "max": 0.7
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "weight": 4,
+          "name": "minecraft:wooden_sword",
+          "functions": [
+            {
+              "function": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:binomial",
+                "n": {
+                  "min": 0,
+                  "max": 8
+                },
+                "p": {
+                  "min": 0.1,
+                  "max": 0.5
+                }
+              },
+              "treasure": true,
+              "conditions": [
+                {
+                  "condition": "minecraft:random_chance",
+                  "chance": 0.075
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 2,
+          "name": "minecraft:wooden_axe",
+          "functions": [
+            {
+              "function": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:binomial",
+                "n": {
+                  "min": 0,
+                  "max": 8
+                },
+                "p": {
+                  "min": 0.1,
+                  "max": 0.5
+                }
+              },
+              "treasure": true,
+              "conditions": [
+                {
+                  "condition": "minecraft:random_chance",
+                  "chance": 0.075
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "minecraft:group",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "weight": 5,
+              "name": "minecraft:golden_sword"
+            },
+            {
+              "type": "minecraft:item",
+              "weight": 1,
+              "name": "minecraft:golden_axe"
+            }
+          ],
+          "conditions": [
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.25
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:binomial",
+        "n": 2,
+        "p": 0.3
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:leather_helmet"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:leather_chestplate"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:leather_leggings"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:leather_boots"
+        }
+      ],
+      "functions": [
+        {
+          "function": "minecraft:enchant_with_levels",
+          "levels": {
+            "type": "minecraft:binomial",
+            "n": {
+              "min": 5,
+              "max": 12
+            },
+            "p": 0.3
+          },
+          "treasure": true
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.75
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_helmet"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_chestplate"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_leggings"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_boots"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.15
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:potato",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:binomial",
+                "n": 1,
+                "p": 0.4
+              },
+              "add": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:cobweb",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:binomial",
+                "n": 3,
+                "p": 0.4
+              },
+              "add": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

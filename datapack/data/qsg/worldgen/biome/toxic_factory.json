@@ -1,0 +1,43 @@
+{
+  "carvers": {
+    "air": [
+      "minecraft:cave",
+      "minecraft:cave_extra_underground",
+      "minecraft:canyon"
+    ]
+  },
+  "downfall": 0.5,
+  "effects": {
+    "fog_color": 857091,
+    "water_color": 3561739,
+    "water_fog_color": 659202,
+    "foliage_color": 7173417,
+    "sky_color": 1452290,
+    "grass_color": 7173417,
+    "mood_sound": {
+      "block_search_extent": 0,
+      "offset": 2.0,
+      "sound": "minecraft:ambient.cave",
+      "tick_delay": 600
+    },
+    "music": {
+      "sound": "minecraft:music.overworld.deep_dark",
+      "min_delay": 10,
+      "max_delay": 20,
+      "replace_current_music": true
+    },
+    "particle": {
+      "probability": 0.025,
+      "options": {
+        "type": "minecraft:spore_blossom_air"
+      }
+    }
+  },
+  "features": [
+    ["trees_swamp"]
+  ],
+  "precipitation": "rain",
+  "spawn_costs": {},
+  "spawners": {},
+  "temperature": 0.5
+}

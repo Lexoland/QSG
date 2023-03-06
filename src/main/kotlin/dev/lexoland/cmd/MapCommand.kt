@@ -40,7 +40,7 @@ val mapCommand = brigadierCommand(
                             .createWorld()!!
 
                         registerMap(Map(name, displayName))
-                        sender.respond("Map {} has been created created.", displayName)
+                        sender.respond("Map {} has been created.", displayName)
                         sender.teleport(world.spawnLocation)
                     }
                     return@executes 1
