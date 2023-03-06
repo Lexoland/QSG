@@ -28,7 +28,7 @@ val gameCommand = brigadierCommand(
 
     literal("leave") {
         executes<Player> { sender, _ ->
-            if (Game.players.containsKey(sender.uniqueId))
+            if (!Game.players.containsKey(sender.uniqueId))
                 throw SimpleCommandExceptionType { "You are not in the game!" }.create()
             sender.persistentDataContainer.set(IGNORE_KEY, PersistentDataType.BYTE, 1.toByte())
             Game.removePlayer(sender)
