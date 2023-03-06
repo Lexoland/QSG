@@ -1,7 +1,7 @@
 package dev.lexoland.core
 
 import dev.lexoland.LOG
-import dev.lexoland.asId
+import dev.lexoland.asKey
 import dev.lexoland.utils.*
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
@@ -12,6 +12,7 @@ import org.bukkit.Sound
 import org.bukkit.World
 import org.bukkit.WorldCreator
 import org.bukkit.entity.Player
+import org.bukkit.persistence.PersistentDataType
 import java.io.File
 import java.util.*
 import kotlin.math.ceil
@@ -19,6 +20,7 @@ import kotlin.random.asKotlinRandom
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
+val IGNORE_KEY = "ignore".asKey()
 const val MIN_PLAYERS = 2
 
 object Game {
@@ -60,6 +62,10 @@ object Game {
     }
 
     fun addPlayer(player: Player) {
+        val ignore = player.persistentDataContainer.getOrDefault(IGNORE_KEY, PersistentDataType.BYTE, 0.toByte()) == 1.toByte()
+        if (ignore)
+            return
+
         val qsgPlayer = QSGPlayer(player)
         players[player.uniqueId] = qsgPlayer
         if (state != GameState.LOBBY) {
@@ -177,7 +183,7 @@ object Game {
             LOG.error("Could not delete uid.dat in $gameWorldDir!")
             return null
         }
-        return Bukkit.createWorld(WorldCreator.ofKey(GAME_WORLD_NAME.asId()))
+        return Bukkit.createWorld(WorldCreator.ofKey(GAME_WORLD_NAME.asKey()))
     }
 
     inline fun eachPlayers(block: (Player) -> Unit) = players.values.forEach { block(it.player) }

@@ -7,7 +7,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider
 import de.leximon.api.command.Arguments
 import de.leximon.api.command.Suggestions
 import dev.lexoland.PLUGIN
-import dev.lexoland.asId
+import dev.lexoland.asKey
 import dev.lexoland.core.*
 import dev.lexoland.core.Map
 import dev.lexoland.utils.*
@@ -35,7 +35,7 @@ val mapCommand = brigadierCommand(
                     val displayName = Arguments.Component.getComponent(context, "displayName")
                     Bukkit.getScheduler().runTask(PLUGIN) { _ ->
                         sender.respond("Generating world...")
-                        val world = WorldCreator.ofKey(name.asId())
+                        val world = WorldCreator.ofKey(name.asKey())
                             .presetVoid()
                             .createWorld()!!
 
@@ -57,7 +57,7 @@ val mapCommand = brigadierCommand(
                 val map = maps[name] ?: throw EXCEPTION_INVALID_MAP.create()
 
                 sender.respond("Teleporting to map {}...", map.displayName)
-                val world = Bukkit.createWorld(WorldCreator.ofKey(name.asId()))!!
+                val world = Bukkit.createWorld(WorldCreator.ofKey(name.asKey()))!!
                 sender.teleport(map.center.toLocation(world).blockCentered())
                 sender.respond("Teleported!")
                 return@executes 1

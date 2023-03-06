@@ -1,17 +1,17 @@
 package dev.lexoland.core
 
-import dev.lexoland.asId
+import dev.lexoland.asKey
 import dev.lexoland.core.Game.randomSource
 import dev.lexoland.utils.FilterableWeightedList
 import dev.lexoland.utils.rgb
 import dev.lexoland.utils.text
-import java.util.Locale
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 import org.bukkit.Bukkit
 import org.bukkit.World
 import org.bukkit.block.Container
 import org.bukkit.loot.Lootable
+import java.util.*
 
 class LootBoxHandler(world: World, map: Map) {
 
@@ -45,7 +45,7 @@ class LootBoxHandler(world: World, map: Map) {
         private val key: String
     ) {
         fun customName() = text(type.name.lowercase(Locale.getDefault()).replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }, type.color)
-        fun toLootTable() = Bukkit.getLootTable("${type.key}/$key".asId())
+        fun toLootTable() = Bukkit.getLootTable("${type.key}/$key".asKey())
     }
 
     enum class Type(

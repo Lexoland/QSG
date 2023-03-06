@@ -1,6 +1,6 @@
 package dev.lexoland.listener
 
-import dev.lexoland.asId
+import dev.lexoland.asKey
 import dev.lexoland.core.Game
 import dev.lexoland.core.GameState
 import dev.lexoland.core.qsg
@@ -16,8 +16,8 @@ import org.bukkit.persistence.PersistentDataType
 
 object GameListener : Listener {
 
-    val KILL_KEY = "qsg/kills".asId()
-    val DEATH_KEY = "qsg/deaths".asId()
+    val KILL_KEY = "qsg/kills".asKey()
+    val DEATH_KEY = "qsg/deaths".asKey()
 
     @EventHandler
     fun onDeath(e: PlayerDeathEvent) {

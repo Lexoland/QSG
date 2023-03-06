@@ -1,7 +1,7 @@
 package dev.lexoland.listener
 
 import com.destroystokyo.paper.event.block.TNTPrimeEvent
-import dev.lexoland.asId
+import dev.lexoland.asKey
 import dev.lexoland.core.Game
 import dev.lexoland.core.map
 import dev.lexoland.utils.blockPosEqual
@@ -20,7 +20,7 @@ import org.bukkit.event.block.BlockPlaceEvent
 
 object BuildListener : Listener {
 
-    private val placeableTag = Bukkit.getTag(Tag.REGISTRY_BLOCKS, "placeable_blocks".asId(), Material::class.java)
+    private val placeableTag = Bukkit.getTag(Tag.REGISTRY_BLOCKS, "placeable_blocks".asKey(), Material::class.java)
 
     val allowed = mutableListOf<Player>()
 

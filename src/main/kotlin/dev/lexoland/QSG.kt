@@ -1,8 +1,8 @@
 package dev.lexoland
 
 import dev.lexoland.cmd.buildCommand
+import dev.lexoland.cmd.gameCommand
 import dev.lexoland.cmd.mapCommand
-import dev.lexoland.cmd.timerCommand
 import dev.lexoland.core.Game
 import dev.lexoland.core.loadMaps
 import dev.lexoland.core.saveMaps
@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory
 val LOG = LoggerFactory.getLogger("QSG") as Logger
 lateinit var PLUGIN: QSG
 
-fun String.asId() = NamespacedKey(PLUGIN, this)
+fun String.asKey() = NamespacedKey(PLUGIN, this)
 
 class QSG : JavaPlugin() {
 
@@ -33,7 +33,7 @@ class QSG : JavaPlugin() {
         commands(
             buildCommand,
             mapCommand,
-            timerCommand
+            gameCommand
         )
         listeners(
             BuildListener,
