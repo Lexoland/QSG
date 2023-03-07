@@ -1,18 +1,14 @@
 package dev.lexoland.core
 
+import dev.lexoland.PLUGIN
 import dev.lexoland.utils.jsonFormat
-import java.io.File
-import java.util.UUID
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
-import org.bukkit.Location
 import org.bukkit.World
-import org.bukkit.WorldCreator
-import org.bukkit.block.Container
 import org.bukkit.util.Vector
+import java.io.File
 
 @Serializable
 data class Map(
@@ -35,7 +31,7 @@ fun registerMap(map: Map) {
     maps[map.name] = map
 }
 
-private val mapDirectory = File("maps")
+private val mapDirectory = File(PLUGIN.dataFolder, "maps")
 
 fun saveMaps() {
     mapDirectory.mkdirs()
